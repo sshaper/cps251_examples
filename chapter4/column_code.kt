@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -55,10 +56,10 @@ class MainActivity : ComponentActivity() {
  * MainScreen is the root composable of the application.
  * It uses a Box as a container to potentially layer UI elements.
  * Inside the Box, it uses a Column to arrange its children vertically.
- * 
+ *
  * The Box:
  * - Takes up the full available space
- * 
+ *
  * The Column:
  * - Takes up the full width
  * - Has top padding of 50.dp
@@ -91,7 +92,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 /**
  * ColumnExample demonstrates a basic Column layout.
  * Shows how to stack elements vertically with basic padding.
- * 
+ *
  * Features:
  * - Basic vertical arrangement
  * - Simple padding
@@ -110,7 +111,7 @@ fun ColumnExample() {
 /**
  * CenteredColumn demonstrates how to center items horizontally.
  * Uses horizontalAlignment parameter to center all children.
- * 
+ *
  * Features:
  * - Full width column
  * - Centered horizontal alignment
@@ -130,7 +131,7 @@ fun CenteredColumn() {
 /**
  * SpacedColumn demonstrates automatic spacing between items.
  * Uses Arrangement.spacedBy to add consistent vertical spacing.
- * 
+ *
  * Features:
  * - Automatic vertical spacing
  * - Consistent padding
@@ -157,7 +158,7 @@ fun SpacedColumn() {
  * 4. Custom text styling with different sizes and weights
  * 5. Different padding for different elements
  * 6. Nested Box with secondary styling
- * 
+ *
  * Features:
  * - Material theme integration
  * - Custom text styles
@@ -193,7 +194,7 @@ fun StyledColumn() {
             ),
             modifier = Modifier.padding(bottom = 8.dp)
         )
-        
+
         Text(
             text = "This is a styled text",
             style = TextStyle(
@@ -201,14 +202,14 @@ fun StyledColumn() {
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
         )
-        
+
         Button(
             onClick = { /* TODO: Add click action */ },
             modifier = Modifier.padding(top = 8.dp)
         ) {
             Text("Styled Button")
         }
-        
+
         Box(
             modifier = Modifier
                 .size(100.dp)
@@ -225,4 +226,17 @@ fun StyledColumn() {
             )
         }
     }
+}
+
+/**
+ * Preview function for Android Studio's preview pane.
+ * This allows developers to see the UI without running the app.
+ *
+ * @param showBackground Shows a background in the preview
+ * @param showSystemUi Shows the system UI in the preview
+ */
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun PreviewFlow() {
+    MainScreen()
 }
