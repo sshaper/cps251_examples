@@ -8,6 +8,7 @@ import androidx.core.view.WindowCompat
 
 // Compose UI Imports
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -92,9 +93,11 @@ fun ModifierExample() {
     Text(
         text = "Hello, Modifier!",
         modifier = Modifier
-            .padding(16.dp)  // Outer padding
+            .border(2.dp, Color.Red)//border around text element
+            .padding(36.dp)  // Outer padding
+            .border(2.dp, Color.Green)//border around text
             .background(Color.LightGray)  // Background color
-            .padding(8.dp)  // Inner padding
+            .padding(18.dp)  // Inner padding around text
     )
 }
 
