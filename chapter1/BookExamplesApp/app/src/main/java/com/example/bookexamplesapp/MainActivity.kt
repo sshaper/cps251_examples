@@ -1,23 +1,21 @@
 package com.example.book
 
-// Core Android imports
+// Android Framework Imports
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 
-// Compose UI imports
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+// Compose UI Imports
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,19 +26,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 /**
- * MainActivity is the entry point of the Android application.
- * It extends ComponentActivity which provides the basic Android activity functionality.
- * This class is responsible for:
- * 1. Setting up the window configuration
- * 2. Initializing the Compose UI
- * 3. Managing the activity lifecycle
+ * MainActivity serves as the entry point for the Android application.
+ * This class demonstrates various Jetpack Compose UI concepts including:
+ * - Modifier usage and chaining
+ * - Layout composition
+ * - Background and padding effects
+ * - Parent-child relationships in layouts
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the status bar to use dark icons for better visibility
+
+        // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        // Set up the Compose UI with MaterialTheme
+
+        // Set up the Compose UI with Material 3 theme
         setContent {
             MaterialTheme {
                 MainScreen()
@@ -50,232 +50,126 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * MainScreen is the root composable of the application.
- * It uses a Box as a container to potentially layer UI elements.
- * Inside the Box, it uses a Column to arrange its children vertically.
+ * MainScreen is the root composable that serves as the main container for the app's content.
+ * It demonstrates a vertical layout using Column with multiple examples of modifier usage.
  *
- * The Box:
- * - Takes up the full available space
- *
- * The Column:
- * - Takes up the full width
- * - Has top padding of 50.dp
- * - Contains examples of different Row layouts:
- *   1. Basic Row with padding (RowExample)
- *   2. Row with explicit spacing (RowWithSpacer)
- *   3. Row with space-between arrangement (RowWithArrangement)
- *   4. Row with top alignment (RowTopAlignment)
- *   5. Row with center alignment (RowCenterAlignment)
- *   6. Row with bottom alignment (RowBottomAlignment)
+ * Layout Structure:
+ * - Column: Main container with full width and top padding
+ *   - ModifierExample: Basic padding and background demonstration
+ *   - Spacer: Fixed height spacing between examples
+ *   - ModifierSizeExample: Size constraints and alignment
+ *   - ModifierChainExample: Modifier order importance
+ *   - ModifierParentChildExample: Parent-child modifier relationships
  */
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
-    Box(modifier = modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 50.dp)
-        ) {
-            // Display different Row layout examples with spacing between them
-            RowExample()  // Basic row with padding from border
-            Spacer(modifier = Modifier.height(16.dp))
-            RowWithSpacer()  // Row with explicit spacing between elements
-            Spacer(modifier = Modifier.height(16.dp))
-            RowWithArrangement()  // Row with space-between arrangement
-            Spacer(modifier = Modifier.height(16.dp))
-            RowTopAlignment()  // Row with top vertical alignment
-            Spacer(modifier = Modifier.height(16.dp))
-            RowCenterAlignment()  // Row with center vertical alignment
-            Spacer(modifier = Modifier.height(16.dp))
-            RowBottomAlignment()  // Row with bottom vertical alignment
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(top = 50.dp)
+    ) {
+        ModifierExample()
+        Spacer(modifier = Modifier.height(16.dp))
+        ModifierSizeExample()
+        Spacer(modifier = Modifier.height(16.dp))
+        ModifierChainExample()
+        Spacer(modifier = Modifier.height(16.dp))
+        ModifierParentChildExample()
     }
 }
 
 /**
- * RowExample demonstrates a basic Row layout with padding from the border.
- * Shows how to create space between the elements and the border of the Row.
+ * ModifierExample demonstrates basic modifier usage with padding and background.
  *
- * Features:
- * - Outer padding of 16.dp
- * - Blue border of 1.dp
- * - Inner padding of 16.dp between elements and border
- * - Five text elements arranged horizontally
+ * This example shows:
+ * - How to apply multiple modifiers in sequence
+ * - The effect of nested padding (outer and inner)
+ * - Background color application
+ * - Text composable with modifiers
  */
 @Composable
-fun RowExample() {
-    Row(
+fun ModifierExample() {
+    Text(
+        text = "Hello, Modifier!",
         modifier = Modifier
             .padding(16.dp)  // Outer padding
-            .border(width = 1.dp, color = Color.Blue)
-            .padding(16.dp)  // Inner padding between elements and border
+            .background(Color.LightGray)  // Background color
+            .padding(8.dp)  // Inner padding
+    )
+}
+
+/**
+ * ModifierSizeExample demonstrates size constraints and alignment in a Box layout.
+ *
+ * This example shows:
+ * - How to set fixed dimensions using size modifier
+ * - Box layout with centered content
+ * - Background color application to a container
+ * - Text alignment within a Box
+ */
+@Composable
+fun ModifierSizeExample() {
+    Box(
+        modifier = Modifier
+            .size(200.dp)
+            .background(Color.Cyan)
     ) {
-        Text("First")
-        Text("Second")
-        Text("Third")
-        Text("Fourth")
-        Text("Fifth")
+        Text(
+            text = "Centered",
+            modifier = Modifier.align(Alignment.Center)
+        )
     }
 }
 
 /**
- * RowWithSpacer demonstrates how to add explicit spacing between elements.
- * Uses Spacer composables to create fixed-width gaps between elements.
+ * ModifierChainExample demonstrates the importance of modifier order.
  *
- * Features:
- * - Padding of 16.dp around the row
- * - Fixed 10.dp spacing between each element
- * - Five text elements with consistent spacing
+ * This example shows:
+ * - How modifier order affects the final appearance
+ * - Background color application before padding
+ * - The visual difference when modifiers are applied in different orders
+ * - This one has a custom color which is ARGB format for read.  First is Alph (ff) second is Red (ff) third is Green (00) fourth is Blue (00)
  */
 @Composable
-fun RowWithSpacer() {
-    Row(modifier = Modifier.padding(16.dp)) {
-        Text("First")
-        Spacer(modifier = Modifier.width(10.dp))
-        Text("Second")
-        Spacer(modifier = Modifier.width(10.dp))
-        Text("Third")
-        Spacer(modifier = Modifier.width(10.dp))
-        Text("Fourth")
-        Spacer(modifier = Modifier.width(10.dp))
-        Text("Fifth")
-    }
+fun ModifierChainExample() {
+    Text(
+        text = "Order Matters",
+        modifier = Modifier
+            .background(Color(0xFFFF0000))
+            .padding(16.dp)
+    )
 }
 
 /**
- * RowWithArrangement demonstrates how to use Arrangement to space elements.
- * Uses SpaceBetween to push elements to opposite ends of the row.
+ * ModifierParentChildExample demonstrates parent-child modifier relationships.
  *
- * Features:
- * - Full width row
- * - Padding of 16.dp around the row
- * - SpaceBetween arrangement for even distribution
- * - Five text elements spread across the width
+ * This example shows:
+ * - How modifiers can be applied to both parent and child components
+ * - Column layout with background and padding
+ * - Child elements with their own modifiers
+ * - The visual hierarchy created by nested modifiers
  */
 @Composable
-fun RowWithArrangement() {
-    Row(
+fun ModifierParentChildExample() {
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .background(Color.Gray)
+            .padding(16.dp)
     ) {
-        Text("First")
-        Text("Second")
-        Text("Third")
-        Text("Fourth")
-        Text("Fifth")
+        Text("Child 1", modifier = Modifier.background(Color.White).padding(8.dp))
+        Text("Child 2", modifier = Modifier.background(Color.LightGray).padding(8.dp))
     }
 }
 
 /**
- * RowTopAlignment demonstrates vertical alignment at the top.
- * Shows how to align elements to the top of a fixed-height row.
+ * Preview function for development purposes.
+ * This allows developers to see the UI in Android Studio's preview pane
+ * without running the app on a device or emulator.
  *
- * Features:
- * - Fixed height of 100.dp
- * - Full width
- * - Blue border
- * - Padding of 16.dp
- * - Top vertical alignment
- * - Fixed 16.dp spacing between elements
- */
-@Composable
-fun RowTopAlignment() {
-    Row(
-        modifier = Modifier
-            .height(100.dp)
-            .fillMaxWidth()
-            .border(width = 1.dp, color = Color.Blue)
-            .padding(16.dp),
-        verticalAlignment = Alignment.Top
-    ) {
-        Text("First")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Second")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Third")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Fourth")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Fifth")
-    }
-}
-
-/**
- * RowCenterAlignment demonstrates vertical alignment at the center.
- * Shows how to center elements vertically within a fixed-height row.
- *
- * Features:
- * - Fixed height of 100.dp
- * - Full width
- * - Blue border
- * - Padding of 16.dp
- * - Center vertical alignment
- * - Fixed 16.dp spacing between elements
- */
-@Composable
-fun RowCenterAlignment() {
-    Row(
-        modifier = Modifier
-            .height(100.dp)
-            .fillMaxWidth()
-            .border(width = 1.dp, color = Color.Blue)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text("First")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Second")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Third")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Fourth")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Fifth")
-    }
-}
-
-/**
- * RowBottomAlignment demonstrates vertical alignment at the bottom.
- * Shows how to align elements to the bottom of a fixed-height row.
- *
- * Features:
- * - Fixed height of 100.dp
- * - Full width
- * - Blue border
- * - Padding of 16.dp
- * - Bottom vertical alignment
- * - Fixed 16.dp spacing between elements
- */
-@Composable
-fun RowBottomAlignment() {
-    Row(
-        modifier = Modifier
-            .height(100.dp)
-            .fillMaxWidth()
-            .border(width = 1.dp, color = Color.Blue)
-            .padding(16.dp),
-        verticalAlignment = Alignment.Bottom
-    ) {
-        Text("First")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Second")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Third")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Fourth")
-        Spacer(modifier = Modifier.width(16.dp))
-        Text("Fifth")
-    }
-}
-
-/**
- * Preview function for Android Studio's preview pane.
- * This allows developers to see the UI without running the app.
- *
- * @param showBackground Shows a background in the preview
- * @param showSystemUi Shows the system UI in the preview
+ * Parameters:
+ * - showBackground: Enables background in preview
+ * - showSystemUi: Shows system UI elements in preview
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

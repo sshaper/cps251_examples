@@ -36,10 +36,10 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI with Material 3 theme
         setContent {
             MaterialTheme {
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
 /**
  * MainScreen is the root composable that serves as the main container for the app's content.
  * It demonstrates a vertical layout using Column with multiple examples of modifier usage.
- * 
+ *
  * Layout Structure:
  * - Column: Main container with full width and top padding
  *   - ModifierExample: Basic padding and background demonstration
@@ -80,7 +80,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
 /**
  * ModifierExample demonstrates basic modifier usage with padding and background.
- * 
+ *
  * This example shows:
  * - How to apply multiple modifiers in sequence
  * - The effect of nested padding (outer and inner)
@@ -100,7 +100,7 @@ fun ModifierExample() {
 
 /**
  * ModifierSizeExample demonstrates size constraints and alignment in a Box layout.
- * 
+ *
  * This example shows:
  * - How to set fixed dimensions using size modifier
  * - Box layout with centered content
@@ -123,25 +123,26 @@ fun ModifierSizeExample() {
 
 /**
  * ModifierChainExample demonstrates the importance of modifier order.
- * 
+ *
  * This example shows:
  * - How modifier order affects the final appearance
  * - Background color application before padding
  * - The visual difference when modifiers are applied in different orders
+ * - This one has a custom color which is ARGB format for read.  First is Alph (ff) second is Red (ff) third is Green (00) fourth is Blue (00)
  */
 @Composable
 fun ModifierChainExample() {
     Text(
         text = "Order Matters",
         modifier = Modifier
-            .background(Color.Red)
+            .background(Color(0xFFFF0000))
             .padding(16.dp)
     )
 }
 
 /**
  * ModifierParentChildExample demonstrates parent-child modifier relationships.
- * 
+ *
  * This example shows:
  * - How modifiers can be applied to both parent and child components
  * - Column layout with background and padding
@@ -165,7 +166,7 @@ fun ModifierParentChildExample() {
  * Preview function for development purposes.
  * This allows developers to see the UI in Android Studio's preview pane
  * without running the app on a device or emulator.
- * 
+ *
  * Parameters:
  * - showBackground: Enables background in preview
  * - showSystemUi: Shows system UI elements in preview
