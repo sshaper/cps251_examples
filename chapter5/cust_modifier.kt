@@ -35,10 +35,10 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
+
         // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI with Material 3 theme
         setContent {
             MaterialTheme {
@@ -51,7 +51,7 @@ class MainActivity : ComponentActivity() {
 /**
  * Custom modifier for creating tag-like elements with consistent styling.
  * This modifier adds a light gray background and padding to create a tag appearance.
- * 
+ *
  * @return Modifier with tag styling applied
  */
 fun Modifier.tagStyle(): Modifier {
@@ -63,11 +63,11 @@ fun Modifier.tagStyle(): Modifier {
 /**
  * Parameterized custom modifier for creating tag-like elements with customizable colors.
  * This modifier allows for custom background colors while maintaining consistent padding.
- * 
- * @param color The background color for the tag (defaults to LightGray)
+ *
+ * @param color The background color for the tag (defaults to Red)
  * @return Modifier with customizable tag styling applied
  */
-fun Modifier.tagStyle(color: Color = Color.LightGray): Modifier {
+fun Modifier.tagStyleParam(color: Color = Color.Red): Modifier {
     return this
         .background(color)
         .padding(horizontal = 8.dp, vertical = 4.dp)
@@ -76,7 +76,7 @@ fun Modifier.tagStyle(color: Color = Color.LightGray): Modifier {
 /**
  * MainScreen is the root composable that serves as the main container for the app's content.
  * It demonstrates various uses of custom modifiers through different examples.
- * 
+ *
  * Layout Structure:
  * - Column: Main container with full width and top padding
  *   - BasicTagExample: Simple tag styling demonstration
@@ -102,7 +102,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
 /**
  * BasicTagExample demonstrates the use of a simple custom modifier.
- * 
+ *
  * This example shows:
  * - How to apply a basic custom modifier
  * - Creating a row of consistently styled tags
@@ -114,14 +114,14 @@ fun BasicTagExample() {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text("Compose", modifier = Modifier.tagStyle())
-        Text("Kotlin", modifier = Modifier.tagStyle())
+        Text("Kotlin", modifier = Modifier.tagStyleParam())//uses default red color
         Text("UI", modifier = Modifier.tagStyle())
     }
 }
 
 /**
  * ColoredTagExample demonstrates the use of parameterized custom modifiers.
- * 
+ *
  * This example shows:
  * - How to use custom modifiers with parameters
  * - Creating tags with different background colors
@@ -132,15 +132,15 @@ fun ColoredTagExample() {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("Android", modifier = Modifier.tagStyle(Color.Green))
+        Text("Android", modifier = Modifier.tagStyleParam(Color.Green))
         Text("iOS", modifier = Modifier.tagStyle())  // Uses default color
-        Text("Web", modifier = Modifier.tagStyle(Color.Blue))
+        Text("Web", modifier = Modifier.tagStyleParam(Color.Blue))
     }
 }
 
 /**
  * MixedTagExample demonstrates combining custom modifiers with built-in ones.
- * 
+ *
  * This example shows:
  * - How to chain custom modifiers with built-in ones
  * - Creating more complex styling combinations
@@ -154,13 +154,13 @@ fun MixedTagExample() {
         Text(
             "New",
             modifier = Modifier
-                .tagStyle(Color.Red)
+                .tagStyle()
                 .padding(4.dp)  // Additional padding
         )
         Text(
             "Popular",
             modifier = Modifier
-                .tagStyle(Color.Cyan)
+                .tagStyleParam(Color.Cyan)
                 .padding(4.dp)  // Additional padding
         )
     }
@@ -170,7 +170,7 @@ fun MixedTagExample() {
  * Preview function for development purposes.
  * This allows developers to see the UI in Android Studio's preview pane
  * without running the app on a device or emulator.
- * 
+ *
  * Parameters:
  * - showBackground: Enables background in preview
  * - showSystemUi: Shows system UI elements in preview

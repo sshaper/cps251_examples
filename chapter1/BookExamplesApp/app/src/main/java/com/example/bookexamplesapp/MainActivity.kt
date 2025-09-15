@@ -8,19 +8,17 @@ import androidx.core.view.WindowCompat
 
 // Compose UI Imports
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -28,11 +26,11 @@ import androidx.compose.ui.unit.dp
 
 /**
  * MainActivity serves as the entry point for the Android application.
- * This class demonstrates various Jetpack Compose UI concepts including:
- * - Modifier usage and chaining
- * - Layout composition
- * - Background and padding effects
- * - Parent-child relationships in layouts
+ * This class demonstrates various custom modifier concepts including:
+ * - Creating and using custom modifiers
+ * - Parameterized custom modifiers
+ * - Reusing modifier styles across components
+ * - Combining custom modifiers with built-in ones
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -51,16 +49,41 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
+ * Custom modifier for creating tag-like elements with consistent styling.
+ * This modifier adds a light gray background and padding to create a tag appearance.
+ *
+ * @return Modifier with tag styling applied
+ */
+fun Modifier.tagStyle(): Modifier {
+    return this
+        .background(Color.LightGray)
+        .padding(horizontal = 8.dp, vertical = 4.dp)
+}
+
+/**
+ * Parameterized custom modifier for creating tag-like elements with customizable colors.
+ * This modifier allows for custom background colors while maintaining consistent padding.
+ *
+ * @param color The background color for the tag (defaults to Red)
+ * @return Modifier with customizable tag styling applied
+ */
+fun Modifier.tagStyleParam(color: Color = Color.Red): Modifier {
+    return this
+        .background(color)
+        .padding(horizontal = 8.dp, vertical = 4.dp)
+}
+
+/**
  * MainScreen is the root composable that serves as the main container for the app's content.
- * It demonstrates a vertical layout using Column with multiple examples of modifier usage.
+ * It demonstrates various uses of custom modifiers through different examples.
  *
  * Layout Structure:
  * - Column: Main container with full width and top padding
- *   - ModifierExample: Basic padding and background demonstration
+ *   - BasicTagExample: Simple tag styling demonstration
  *   - Spacer: Fixed height spacing between examples
- *   - ModifierSizeExample: Size constraints and alignment
- *   - ModifierChainExample: Modifier order importance
- *   - ModifierParentChildExample: Parent-child modifier relationships
+ *   - ColoredTagExample: Parameterized tag styling
+ *   - Spacer: Fixed height spacing between examples
+ *   - MixedTagExample: Combining custom and built-in modifiers
  */
 @Composable
 fun MainScreen(modifier: Modifier = Modifier) {
@@ -69,99 +92,77 @@ fun MainScreen(modifier: Modifier = Modifier) {
             .fillMaxWidth()
             .padding(top = 50.dp)
     ) {
-        ModifierExample()
+        BasicTagExample()
         Spacer(modifier = Modifier.height(16.dp))
-        ModifierSizeExample()
+        ColoredTagExample()
         Spacer(modifier = Modifier.height(16.dp))
-        ModifierChainExample()
-        Spacer(modifier = Modifier.height(16.dp))
-        ModifierParentChildExample()
+        MixedTagExample()
     }
 }
 
 /**
- * ModifierExample demonstrates basic modifier usage with padding and background.
+ * BasicTagExample demonstrates the use of a simple custom modifier.
  *
  * This example shows:
- * - How to apply multiple modifiers in sequence
- * - The effect of nested padding (outer and inner)
- * - Background color application
- * - Text composable with modifiers
+ * - How to apply a basic custom modifier
+ * - Creating a row of consistently styled tags
+ * - Using Arrangement for spacing between tags
  */
 @Composable
-fun ModifierExample() {
-    Text(
-        text = "Hello, Modifier!",
-        modifier = Modifier
-            .border(2.dp, Color.Red)//border around text element
-            .padding(36.dp)  // Outer padding
-            .border(2.dp, Color.Green)//border around text
-            .background(Color.LightGray)  // Background color
-            .padding(18.dp)  // Inner padding around text
-    )
+fun BasicTagExample() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Compose", modifier = Modifier.tagStyle())
+        Text("Kotlin", modifier = Modifier.tagStyleParam())//uses default red color
+        Text("UI", modifier = Modifier.tagStyle())
+    }
 }
 
 /**
- * ModifierSizeExample demonstrates size constraints and alignment in a Box layout.
+ * ColoredTagExample demonstrates the use of parameterized custom modifiers.
  *
  * This example shows:
- * - How to set fixed dimensions using size modifier
- * - Box layout with centered content
- * - Background color application to a container
- * - Text alignment within a Box
+ * - How to use custom modifiers with parameters
+ * - Creating tags with different background colors
+ * - Using default parameter values
  */
 @Composable
-fun ModifierSizeExample() {
-    Box(
-        modifier = Modifier
-            .size(200.dp)
-            .background(Color.Cyan)
+fun ColoredTagExample() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text("Android", modifier = Modifier.tagStyleParam(Color.Green))
+        Text("iOS", modifier = Modifier.tagStyle())  // Uses default color
+        Text("Web", modifier = Modifier.tagStyleParam(Color.Blue))
+    }
+}
+
+/**
+ * MixedTagExample demonstrates combining custom modifiers with built-in ones.
+ *
+ * This example shows:
+ * - How to chain custom modifiers with built-in ones
+ * - Creating more complex styling combinations
+ * - Using multiple custom modifiers together
+ */
+@Composable
+fun MixedTagExample() {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = "Centered",
-            modifier = Modifier.align(Alignment.Center)
+            "New",
+            modifier = Modifier
+                .tagStyle()
+                .padding(4.dp)  // Additional padding
         )
-    }
-}
-
-/**
- * ModifierChainExample demonstrates the importance of modifier order.
- *
- * This example shows:
- * - How modifier order affects the final appearance
- * - Background color application before padding
- * - The visual difference when modifiers are applied in different orders
- * - This one has a custom color which is ARGB format for read.  First is Alph (ff) second is Red (ff) third is Green (00) fourth is Blue (00)
- */
-@Composable
-fun ModifierChainExample() {
-    Text(
-        text = "Order Matters",
-        modifier = Modifier
-            .background(Color(0xFFFF0000))
-            .padding(16.dp)
-    )
-}
-
-/**
- * ModifierParentChildExample demonstrates parent-child modifier relationships.
- *
- * This example shows:
- * - How modifiers can be applied to both parent and child components
- * - Column layout with background and padding
- * - Child elements with their own modifiers
- * - The visual hierarchy created by nested modifiers
- */
-@Composable
-fun ModifierParentChildExample() {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Gray)
-            .padding(16.dp)
-    ) {
-        Text("Child 1", modifier = Modifier.background(Color.White).padding(8.dp))
-        Text("Child 2", modifier = Modifier.background(Color.LightGray).padding(8.dp))
+        Text(
+            "Popular",
+            modifier = Modifier
+                .tagStyleParam(Color.Cyan)
+                .padding(4.dp)  // Additional padding
+        )
     }
 }
 
@@ -176,6 +177,6 @@ fun ModifierParentChildExample() {
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewFlow() {
+fun PreviewCustomModifiers() {
     MainScreen()
 }
