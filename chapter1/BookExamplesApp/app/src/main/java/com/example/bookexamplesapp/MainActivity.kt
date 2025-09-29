@@ -1,41 +1,27 @@
 package com.example.bookexamplesapp
 
-// Android core imports
+// Android framework imports
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
 
 // Compose UI imports
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.ImeAction
+import androidx.core.view.WindowCompat
 
 /**
- * MainActivity is the entry point of the app.
- * It sets up the Compose UI and configures the system status bar appearance.
+ * MainActivity serves as the entry point of the application.
+ * This class extends ComponentActivity which is the base class for activities that use Jetpack Compose.
+ */
+/**
+ * MainActivity serves as the entry point of the Android application.
+ * It initializes the app's UI using Jetpack Compose and configures the window appearance.
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -50,129 +36,132 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
 /**
- * MainScreen is the root composable for the application's main content.
- * It simply hosts the FocusExample composable, which demonstrates a login form.
+ * MainScreen is the root composable that centers the form in the screen.
+ * It uses Box with center alignment to position the form in the middle of the screen.
  */
 @Composable
 fun MainScreen() {
-    FocusExample()
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        SimpleForm()
+    }
 }
 
 /**
- * FocusExample demonstrates keyboard and focus management for a login form.
- * It uses FocusRequester, KeyboardOptions, and KeyboardActions to control
- * the IME (keyboard) behavior and field focus transitions.
+ * SimpleForm is a composable that implements a contact form with three input fields:
+ * 1. Name field (basic TextField)
+ * 2. Email field (OutlinedTextField with validation)
+ * 3. Message field (multi-line OutlinedTextField)
  *
- * Features:
- * - Each field uses the appropriate keyboard type and IME action (Next/Done)
- * - Focus moves to the next field when "Next" is pressed
- * - Keyboard hides when "Done" is pressed on the password field
- * - The first field is auto-focused when the screen appears
+ * The form includes:
+ * - Input validation for email format
+ * - Placeholder text for better UX
+ * - A submit button that clears the form
+ * - Proper spacing and layout using Column and modifiers
  */
 @Composable
-fun FocusExample(modifier: Modifier = Modifier) {
-    // State variables to store the text input values
-    var name by remember { mutableStateOf("") }
+fun SimpleForm() {
+    // State management for form fields using remember and mutableStateOf
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
+    var message by remember { mutableStateOf("") }
+    var usernameHasInteracted by remember { mutableStateOf(false) } // New state for name field
+    // interaction
+    var isUserNameValid by remember { mutableStateOf(true) } // New state for name field validity
 
-    // Create focus requesters to manage focus between fields
-    val nameFocusRequester = remember { FocusRequester() }
-    val emailFocusRequester = remember { FocusRequester() }
-    val passwordFocusRequester = remember { FocusRequester() }
-    val focusManager = LocalFocusManager.current
-
-    // Main column layout for the form
     Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(16.dp)
-            .padding(top = 50.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier
+            .fillMaxWidth(0.8f)  // Form takes 80% of screen width
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Name input field
-        OutlinedTextField(
-            value = name,
-            onValueChange = { name = it },
-            label = { Text("Name") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(nameFocusRequester),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { emailFocusRequester.requestFocus() }
-            ),
-            singleLine = true
+        // Form title using Material Design typography
+        Text(
+            text = "Contact Form",
+            style = MaterialTheme.typography.headlineMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        // Email input field
+        // Name input field with placeholder
+        OutlinedTextField( // Changed to OutlinedTextField
+            value = username,
+            onValueChange = {
+                username = it
+                usernameHasInteracted = true // Mark as interacted
+                isUserNameValid = it.length >= 3 // Validation logic
+            },
+            label = { Text("Name") },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Enter your full name") },
+            isError = usernameHasInteracted && !isUserNameValid, // Error state based on
+            // interaction and
+            // validity
+            supportingText = {
+                if (usernameHasInteracted && !isUserNameValid) {
+                    Text(
+                        text = "Name must be at least 3 characters",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+        )
+
+        // Email input field with validation
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
             label = { Text("Email") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .focusRequester(emailFocusRequester),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Email,
-                imeAction = ImeAction.Next
-            ),
-            keyboardActions = KeyboardActions(
-                onNext = { passwordFocusRequester.requestFocus() }
-            ),
-            singleLine = true
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Enter your email address") },
+            isError = email.isNotEmpty() && !email.contains("@"),  // Basic email validation
+            supportingText = {
+                if (email.isNotEmpty() && !email.contains("@")) {
+                    Text(
+                        text = "Email must contain an @ symbol",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         )
 
-        // Password input field
+        // Multi-line message input field
         OutlinedTextField(
-            value = password,
-            onValueChange = { password = it },
-            label = { Text("Password") },
+            value = message,
+            onValueChange = { message = it },
+            label = { Text("Message") },
             modifier = Modifier
                 .fillMaxWidth()
-                .focusRequester(passwordFocusRequester),
-            keyboardOptions = KeyboardOptions(
-                keyboardType = KeyboardType.Password,
-                imeAction = ImeAction.Done
-            ),
-            keyboardActions = KeyboardActions(
-                onDone = { focusManager.clearFocus() }
-            ),
-            visualTransformation = PasswordVisualTransformation(),
-            singleLine = true
+                .height(120.dp),
+            minLines = 3,
+            maxLines = 5
         )
 
-        // Submit button (optional, for demonstration)
+        // Submit button that clears all form fields
         Button(
             onClick = {
-                // Handle form submission here
-                focusManager.clearFocus()
+                username = ""
+                email = ""
+                message = ""
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
         ) {
             Text("Submit")
         }
     }
-
-    // Request focus on the name field when the composable is first created
-    LaunchedEffect(Unit) {
-        nameFocusRequester.requestFocus()
-    }
 }
 
 /**
- * Preview for testing in Android Studio.
- * Shows the FocusExample composable in a MaterialTheme context.
+ * Preview composable for Android Studio's preview pane.
+ * Shows how the app looks with system UI elements.
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun FocusExamplePreview() {
-    MaterialTheme {
-        FocusExample()
-    }
+fun PreviewFlow() {
+    MainScreen()
 }

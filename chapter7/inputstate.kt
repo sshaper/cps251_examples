@@ -88,7 +88,7 @@ fun LoginScreen() {
             value = username,
             onValueChange = {
                 username = it
-                isUsernameValid = it.length >= 3
+                isUsernameValid = it.length >= 3 //it.length >= 3 returns true or false.
             },
             label = { Text("Username") },
             modifier = Modifier.fillMaxWidth(),
