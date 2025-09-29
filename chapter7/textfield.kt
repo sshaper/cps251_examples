@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
 
 /**
  * MainActivity serves as the entry point of the application.
@@ -54,7 +55,7 @@ fun MainScreen() {
  * 1. Name field (basic TextField)
  * 2. Email field (OutlinedTextField with validation)
  * 3. Message field (multi-line OutlinedTextField)
- * 
+ *
  * The form includes:
  * - Input validation for email format
  * - Placeholder text for better UX
@@ -64,9 +65,12 @@ fun MainScreen() {
 @Composable
 fun SimpleForm() {
     // State management for form fields using remember and mutableStateOf
-    var name by remember { mutableStateOf("") }
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var message by remember { mutableStateOf("") }
+    var usernameHasInteracted by remember { mutableStateOf(false) } // New state for name field
+    // interaction
+    var isUserNameValid by remember { mutableStateOf(true) } // New state for name field validity
 
     Column(
         modifier = Modifier
@@ -83,12 +87,27 @@ fun SimpleForm() {
         )
 
         // Name input field with placeholder
-        TextField(
-            value = name,
-            onValueChange = { name = it },
+        OutlinedTextField( // Changed to OutlinedTextField
+            value = username,
+            onValueChange = {
+                username = it
+                usernameHasInteracted = true // Mark as interacted
+                isUserNameValid = it.length >= 3 // Validation logic
+            },
             label = { Text("Name") },
             modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter your full name") }
+            placeholder = { Text("Enter your full name") },
+            isError = usernameHasInteracted && !isUserNameValid, // Error state based on
+            // interaction and
+            // validity
+            supportingText = {
+                if (usernameHasInteracted && !isUserNameValid) {
+                    Text(
+                        text = "Name must be at least 3 characters",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         )
 
         // Email input field with validation
@@ -98,7 +117,15 @@ fun SimpleForm() {
             label = { Text("Email") },
             modifier = Modifier.fillMaxWidth(),
             placeholder = { Text("Enter your email address") },
-            isError = email.isNotEmpty() && !email.contains("@")  // Basic email validation
+            isError = email.isNotEmpty() && !email.contains("@"),  // Basic email validation
+            supportingText = {
+                if (email.isNotEmpty() && !email.contains("@")) {
+                    Text(
+                        text = "Email must contain an @ symbol",
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         )
 
         // Multi-line message input field
@@ -116,7 +143,7 @@ fun SimpleForm() {
         // Submit button that clears all form fields
         Button(
             onClick = {
-                name = ""
+                username = ""
                 email = ""
                 message = ""
             },

@@ -1,45 +1,48 @@
-package com.example.book
+package com.example.bookexamplesapp
 
-// Android Framework Imports
+// Android core imports
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 
-// Compose UI Imports
-import androidx.compose.foundation.background
+// Compose UI imports
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
 
 /**
- * MainActivity serves as the entry point for the Android application.
- * This class demonstrates various custom modifier concepts including:
- * - Creating and using custom modifiers
- * - Parameterized custom modifiers
- * - Reusing modifier styles across components
- * - Combining custom modifiers with built-in ones
+ * MainActivity is the entry point of the app.
+ * It sets up the Compose UI and configures the system status bar appearance.
  */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // Configure the window to use light status bar icons for better visibility
+        // Configure the status bar to use dark icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-
-        // Set up the Compose UI with Material 3 theme
+        // Set up the Compose UI with MaterialTheme
         setContent {
             MaterialTheme {
                 MainScreen()
@@ -49,134 +52,127 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * Custom modifier for creating tag-like elements with consistent styling.
- * This modifier adds a light gray background and padding to create a tag appearance.
- *
- * @return Modifier with tag styling applied
- */
-fun Modifier.tagStyle(): Modifier {
-    return this
-        .background(Color.LightGray)
-        .padding(horizontal = 8.dp, vertical = 4.dp)
-}
-
-/**
- * Parameterized custom modifier for creating tag-like elements with customizable colors.
- * This modifier allows for custom background colors while maintaining consistent padding.
- *
- * @param color The background color for the tag (defaults to Red)
- * @return Modifier with customizable tag styling applied
- */
-fun Modifier.tagStyleParam(color: Color = Color.Red): Modifier {
-    return this
-        .background(color)
-        .padding(horizontal = 8.dp, vertical = 4.dp)
-}
-
-/**
- * MainScreen is the root composable that serves as the main container for the app's content.
- * It demonstrates various uses of custom modifiers through different examples.
- *
- * Layout Structure:
- * - Column: Main container with full width and top padding
- *   - BasicTagExample: Simple tag styling demonstration
- *   - Spacer: Fixed height spacing between examples
- *   - ColoredTagExample: Parameterized tag styling
- *   - Spacer: Fixed height spacing between examples
- *   - MixedTagExample: Combining custom and built-in modifiers
+ * MainScreen is the root composable for the application's main content.
+ * It simply hosts the FocusExample composable, which demonstrates a login form.
  */
 @Composable
-fun MainScreen(modifier: Modifier = Modifier) {
+fun MainScreen() {
+    FocusExample()
+}
+
+/**
+ * FocusExample demonstrates keyboard and focus management for a login form.
+ * It uses FocusRequester, KeyboardOptions, and KeyboardActions to control
+ * the IME (keyboard) behavior and field focus transitions.
+ *
+ * Features:
+ * - Each field uses the appropriate keyboard type and IME action (Next/Done)
+ * - Focus moves to the next field when "Next" is pressed
+ * - Keyboard hides when "Done" is pressed on the password field
+ * - The first field is auto-focused when the screen appears
+ */
+@Composable
+fun FocusExample(modifier: Modifier = Modifier) {
+    // State variables to store the text input values
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    // Create focus requesters to manage focus between fields
+    val nameFocusRequester = remember { FocusRequester() }
+    val emailFocusRequester = remember { FocusRequester() }
+    val passwordFocusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+
+    // Main column layout for the form
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(top = 50.dp)
+            .padding(16.dp)
+            .padding(top = 50.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        BasicTagExample()
-        Spacer(modifier = Modifier.height(16.dp))
-        ColoredTagExample()
-        Spacer(modifier = Modifier.height(16.dp))
-        MixedTagExample()
-    }
-}
-
-/**
- * BasicTagExample demonstrates the use of a simple custom modifier.
- *
- * This example shows:
- * - How to apply a basic custom modifier
- * - Creating a row of consistently styled tags
- * - Using Arrangement for spacing between tags
- */
-@Composable
-fun BasicTagExample() {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text("Compose", modifier = Modifier.tagStyle())
-        Text("Kotlin", modifier = Modifier.tagStyleParam())//uses default red color
-        Text("UI", modifier = Modifier.tagStyle())
-    }
-}
-
-/**
- * ColoredTagExample demonstrates the use of parameterized custom modifiers.
- *
- * This example shows:
- * - How to use custom modifiers with parameters
- * - Creating tags with different background colors
- * - Using default parameter values
- */
-@Composable
-fun ColoredTagExample() {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text("Android", modifier = Modifier.tagStyleParam(Color.Green))
-        Text("iOS", modifier = Modifier.tagStyle())  // Uses default color
-        Text("Web", modifier = Modifier.tagStyleParam(Color.Blue))
-    }
-}
-
-/**
- * MixedTagExample demonstrates combining custom modifiers with built-in ones.
- *
- * This example shows:
- * - How to chain custom modifiers with built-in ones
- * - Creating more complex styling combinations
- * - Using multiple custom modifiers together
- */
-@Composable
-fun MixedTagExample() {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        Text(
-            "New",
+        // Name input field
+        OutlinedTextField(
+            value = name,
+            onValueChange = { name = it },
+            label = { Text("Name") },
             modifier = Modifier
-                .tagStyle()
-                .padding(4.dp)  // Additional padding
+                .fillMaxWidth()
+                .focusRequester(nameFocusRequester),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Text,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { emailFocusRequester.requestFocus() }
+            ),
+            singleLine = true
         )
-        Text(
-            "Popular",
+
+        // Email input field
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
             modifier = Modifier
-                .tagStyleParam(Color.Cyan)
-                .padding(4.dp)  // Additional padding
+                .fillMaxWidth()
+                .focusRequester(emailFocusRequester),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Email,
+                imeAction = ImeAction.Next
+            ),
+            keyboardActions = KeyboardActions(
+                onNext = { passwordFocusRequester.requestFocus() }
+            ),
+            singleLine = true
         )
+
+        // Password input field
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Password") },
+            modifier = Modifier
+                .fillMaxWidth()
+                .focusRequester(passwordFocusRequester),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Password,
+                imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = { focusManager.clearFocus() }
+            ),
+            visualTransformation = PasswordVisualTransformation(),
+            singleLine = true
+        )
+
+        // Submit button (optional, for demonstration)
+        Button(
+            onClick = {
+                // Handle form submission here
+                focusManager.clearFocus()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Submit")
+        }
+    }
+
+    // Request focus on the name field when the composable is first created
+    LaunchedEffect(Unit) {
+        nameFocusRequester.requestFocus()
     }
 }
 
 /**
- * Preview function for development purposes.
- * This allows developers to see the UI in Android Studio's preview pane
- * without running the app on a device or emulator.
- *
- * Parameters:
- * - showBackground: Enables background in preview
- * - showSystemUi: Shows system UI elements in preview
+ * Preview for testing in Android Studio.
+ * Shows the FocusExample composable in a MaterialTheme context.
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewCustomModifiers() {
-    MainScreen()
+fun FocusExamplePreview() {
+    MaterialTheme {
+        FocusExample()
+    }
 }
