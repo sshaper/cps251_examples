@@ -1,167 +1,160 @@
 package com.example.bookexamplesapp
 
-// Android framework imports
+// Core Android imports
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.core.view.WindowCompat
 
 // Compose UI imports
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowCompat
+import androidx.navigation.NavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
 
-/**
- * MainActivity serves as the entry point of the application.
- * This class extends ComponentActivity which is the base class for activities that use Jetpack Compose.
- */
-/**
- * MainActivity serves as the entry point of the Android application.
- * It initializes the app's UI using Jetpack Compose and configures the window appearance.
- */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the status bar to use dark icons for better visibility
+        // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        // Set up the Compose UI with MaterialTheme
+
+        // Set up the Compose UI with Material Design theme
         setContent {
             MaterialTheme {
-                MainScreen()
+                Surface {
+                    MainScreen()
+                }
             }
         }
     }
 }
-/**
- * MainScreen is the root composable that centers the form in the screen.
- * It uses Box with center alignment to position the form in the middle of the screen.
- */
+
+// NavigationRoutes.kt
+object NavigationRoutes {
+    const val HOME = "home"
+    const val PROFILE = "profile"
+    const val SETTINGS = "settings"
+}
+
+// BottomNavigation.kt
+@Composable
+fun BottomNavigationBar(navController: NavController) {
+    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
+
+    NavigationBar {
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            label = { Text("Home") },
+            selected = currentRoute == NavigationRoutes.HOME,
+            onClick = {
+                navController.navigate(NavigationRoutes.HOME) {
+                    launchSingleTop = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
+            label = { Text("Profile") },
+            selected = currentRoute == NavigationRoutes.PROFILE,
+            onClick = {
+                navController.navigate(NavigationRoutes.PROFILE) {
+                    launchSingleTop = true
+                }
+            }
+        )
+        NavigationBarItem(
+            icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
+            label = { Text("Settings") },
+            selected = currentRoute == NavigationRoutes.SETTINGS,
+            onClick = {
+                navController.navigate(NavigationRoutes.SETTINGS) {
+                    launchSingleTop = true
+                }
+            }
+        )
+    }
+}
+
+
+
+// MainScreen.kt
 @Composable
 fun MainScreen() {
+    val navController = rememberNavController()
+
+    Scaffold(
+        bottomBar = { BottomNavigationBar(navController) }
+    ) { paddingValues ->
+        NavHost(
+            navController = navController,
+            startDestination = NavigationRoutes.HOME,
+            modifier = Modifier.padding(paddingValues)
+        ) {
+            composable(NavigationRoutes.HOME) { HomeScreen() }
+            composable(NavigationRoutes.PROFILE) { ProfileScreen() }
+            composable(NavigationRoutes.SETTINGS) { SettingsScreen() }
+        }
+    }
+}
+
+@Composable
+fun HomeScreen() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center
     ) {
-        SimpleForm()
+        Text("Home Screen")
     }
 }
 
-/**
- * SimpleForm is a composable that implements a contact form with three input fields:
- * 1. Name field (basic TextField)
- * 2. Email field (OutlinedTextField with validation)
- * 3. Message field (multi-line OutlinedTextField)
- *
- * The form includes:
- * - Input validation for email format
- * - Placeholder text for better UX
- * - A submit button that clears the form
- * - Proper spacing and layout using Column and modifiers
- */
 @Composable
-fun SimpleForm() {
-    // State management for form fields using remember and mutableStateOf
-    var username by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("") }
-    var message by remember { mutableStateOf("") }
-    var usernameHasInteracted by remember { mutableStateOf(false) } // New state for name field
-    // interaction
-    var isUserNameValid by remember { mutableStateOf(true) } // New state for name field validity
-
-    Column(
-        modifier = Modifier
-            .fillMaxWidth(0.8f)  // Form takes 80% of screen width
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+fun ProfileScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
     ) {
-        // Form title using Material Design typography
-        Text(
-            text = "Contact Form",
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-
-        // Name input field with placeholder
-        OutlinedTextField( // Changed to OutlinedTextField
-            value = username,
-            onValueChange = {
-                username = it
-                usernameHasInteracted = true // Mark as interacted
-                isUserNameValid = it.length >= 3 // Validation logic
-            },
-            label = { Text("Name") },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter your full name") },
-            isError = usernameHasInteracted && !isUserNameValid, // Error state based on
-            // interaction and
-            // validity
-            supportingText = {
-                if (usernameHasInteracted && !isUserNameValid) {
-                    Text(
-                        text = "Name must be at least 3 characters",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        )
-
-        // Email input field with validation
-        OutlinedTextField(
-            value = email,
-            onValueChange = { email = it },
-            label = { Text("Email") },
-            modifier = Modifier.fillMaxWidth(),
-            placeholder = { Text("Enter your email address") },
-            isError = email.isNotEmpty() && !email.contains("@"),  // Basic email validation
-            supportingText = {
-                if (email.isNotEmpty() && !email.contains("@")) {
-                    Text(
-                        text = "Email must contain an @ symbol",
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-        )
-
-        // Multi-line message input field
-        OutlinedTextField(
-            value = message,
-            onValueChange = { message = it },
-            label = { Text("Message") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp),
-            minLines = 3,
-            maxLines = 5
-        )
-
-        // Submit button that clears all form fields
-        Button(
-            onClick = {
-                username = ""
-                email = ""
-                message = ""
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp)
-        ) {
-            Text("Submit")
-        }
+        Text("Profile Screen")
     }
 }
 
-/**
- * Preview composable for Android Studio's preview pane.
- * Shows how the app looks with system UI elements.
- */
+@Composable
+fun SettingsScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text("Settings Screen")
+    }
+}
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun PreviewFlow() {
-    MainScreen()
+fun MainScreenPreview() {
+    MaterialTheme {
+        MainScreen()
+    }
 }

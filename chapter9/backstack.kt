@@ -2,7 +2,9 @@ package com.example.bookexamplesapp
 
 // Core Android imports
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 
@@ -20,10 +22,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 // Navigation imports
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -37,11 +41,13 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Configure the window to use light status bar icons
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI
         setContent {
             MaterialTheme {
                 Surface {
+                    // The NavController should be created inside a Composable context
+                    val navController = rememberNavController()
                     SimpleNavigationExample()
                 }
             }
@@ -52,38 +58,40 @@ class MainActivity : ComponentActivity() {
 /**
  * SimpleNavigationExample sets up the navigation structure of the app.
  * It uses Jetpack Compose Navigation to manage screen transitions between Home and Profile screens.
- * 
- * The navigation is implemented using a NavHost, which is the container for all navigation-related
- * components. It manages the navigation graph and handles the navigation between different screens.
  */
 @Composable
 fun SimpleNavigationExample() {
-    // Create a NavController to handle navigation between screens
     val navController = rememberNavController()
+    val context = LocalContext.current // Get context for the Toast
 
-    // Define the navigation graph
+    // 2. Add the BackHandler to intercept the system back button.
+    BackHandler {
+        // Check if there is a screen to go back to.
+        if (navController.previousBackStackEntry != null) {
+            navController.popBackStack()
+        } else {
+            // If on the start destination, show a toast instead of exiting.
+            Toast.makeText(context, "Nothing more to go back to!", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     NavHost(
         navController = navController,
-        startDestination = "home" // The first screen to show when the app starts
+        startDestination = "home"
     ) {
-        // Define the home screen route
-        composable("home") {
+        composable("home") { it -> // This 'it ->' is the required fix
             HomeScreen(
                 onNavigateToProfile = {
-                    // Navigate to profile screen with launchSingleTop=true
-                    // This prevents multiple instances of the same screen in the back stack
-                    // and helps avoid animation state issues that can occur with rapid navigation
                     navController.navigate("profile") {
                         launchSingleTop = true
                     }
                 }
             )
         }
-        // Define the profile screen route
-        composable("profile") {
+
+        composable("profile") { it -> // This 'it ->' is also required
             ProfileScreen(
                 onNavigateBack = {
-                    // Pop the current screen off the back stack to return to the previous screen
                     navController.popBackStack()
                 }
             )
@@ -91,11 +99,13 @@ fun SimpleNavigationExample() {
     }
 }
 
+
+
+
+
 /**
  * HomeScreen displays the main screen of the application.
  * It contains a button to navigate to the profile screen and a text message.
- * 
- * @param onNavigateToProfile Callback function to handle navigation to the profile screen
  */
 @Composable
 fun HomeScreen(onNavigateToProfile: () -> Unit) {
@@ -120,8 +130,6 @@ fun HomeScreen(onNavigateToProfile: () -> Unit) {
 /**
  * ProfileScreen displays the profile screen of the application.
  * It contains a button to navigate back to the home screen and a text message.
- * 
- * @param onNavigateBack Callback function to handle navigation back to the home screen
  */
 @Composable
 fun ProfileScreen(onNavigateBack: () -> Unit) {
@@ -145,7 +153,6 @@ fun ProfileScreen(onNavigateBack: () -> Unit) {
 
 /**
  * Preview function to see the UI in Android Studio's preview pane.
- * This allows developers to see how the navigation and screens look without running the app.
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
