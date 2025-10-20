@@ -13,9 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,7 +42,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Configure the window to use light status bar icons
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI with navigation
         setContent {
             MaterialTheme {
@@ -55,7 +60,7 @@ class MainActivity : ComponentActivity() {
  * 1. Pass arguments between screens using navigation routes
  * 2. Define typed arguments in the navigation graph
  * 3. Extract and use arguments in the destination screens
- * 
+ *
  * The navigation uses a pattern of "profile/{userId}" where {userId} is a dynamic parameter
  * that gets passed to the profile screen.
  */
@@ -70,27 +75,27 @@ fun NavigationWithArgs() {
         // Home screen route - starting point of the navigation
         composable("home") {
             HomeScreen(
-                onNavigateToProfile = { userId -> 
+                onNavigateToProfile = { data ->
                     // Navigate to profile screen with a userId parameter
                     // The route will be constructed as "profile/user123"
-                    navController.navigate("profile/$userId") 
+                    navController.navigate("enteredText/$data")
                 }
             )
         }
-        
+
         // Profile screen route with argument
-        // The {userId} in the route is a placeholder for the actual user ID
+        // The {data} in the route is a placeholder for the actual user ID
         composable(
-            route = "profile/{userId}",
+            route = "enteredText/{data}",
             // Define the argument type as String
             arguments = listOf(
-                navArgument("userId") { type = NavType.StringType }
+                navArgument("data") { type = NavType.StringType }
             )
         ) { backStackEntry ->
-            // Extract the userId argument from the navigation back stack entry
-            val userId = backStackEntry.arguments?.getString("userId")
-            ProfileScreen(
-                userId = userId,
+            // Extract the data argument from the navigation back stack entry
+            val data = backStackEntry.arguments?.getString("data")
+            DisplayTextScreen(
+                data = data,
                 onNavigateBack = {
                     navController.popBackStack()
                 }
@@ -102,12 +107,13 @@ fun NavigationWithArgs() {
 /**
  * HomeScreen displays the main screen of the application.
  * It contains a button that navigates to a specific user's profile.
- * 
+ *
  * @param onNavigateToProfile Callback function that takes a userId parameter
  *                          and handles navigation to the profile screen
  */
 @Composable
 fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
+    var text by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -115,24 +121,29 @@ fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
+        OutlinedTextField(
+            value = text,
+            onValueChange = {text = it},
+                label = { Text("Enter text")}
+        )
         // Button that triggers navigation with a hardcoded user ID
         // In a real app, this would typically come from a user selection or authentication
-        Button(onClick = { onNavigateToProfile("user123") }) {
-            Text("View Profile")
+        Button(onClick = { onNavigateToProfile(text) }) {
+            Text("Send text to display text screen")
         }
     }
 }
 
 /**
- * ProfileScreen displays the profile information for a specific user.
- * It shows the user ID passed through navigation and provides a way to go back.
- * 
- * @param userId The ID of the user whose profile is being displayed
+ * DisplayTextScreen displays the profile information for a specific user.
+ * It shows the content the user passed through navigation and provides a way to go back.
+ *
+ * @param data The data the user entered.
  * @param onNavigateBack Callback function to handle navigation back to the home screen
  */
 @Composable
-fun ProfileScreen(
-    userId: String?,
+fun DisplayTextScreen(
+    data: String?,
     onNavigateBack: () -> Unit
 ) {
     Column(
@@ -143,7 +154,7 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Top
     ) {
         // Display the user ID passed through navigation
-        Text("Profile for user: $userId")
+        Text("Entered Text: $data")
         Button(onClick = onNavigateBack) {
             Text("Go Back")
         }

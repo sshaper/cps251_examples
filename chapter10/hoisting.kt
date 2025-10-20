@@ -1,4 +1,4 @@
-package com.example.book
+package com.example.bookexamplesapp
 
 // Core Android imports
 import android.os.Bundle
@@ -8,6 +8,7 @@ import androidx.core.view.WindowCompat
 
 // Compose UI imports
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
@@ -35,7 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI with Material Design theme
         setContent {
             MaterialTheme {
@@ -53,7 +54,7 @@ class MainActivity : ComponentActivity() {
  * 1. State is managed at the parent level
  * 2. State is passed down to child composables
  * 3. Events are passed up through callbacks
- * 
+ *
  * The composable uses:
  * - remember and mutableStateOf for state management
  * - Column for vertical layout
@@ -64,7 +65,7 @@ fun CounterParent() {
     // State management using remember and mutableStateOf
     // This ensures the state persists across recompositions
     var count by remember { mutableStateOf(0) }
-    
+
     // Column layout with padding for proper spacing
     Column(
         modifier = Modifier
@@ -73,7 +74,8 @@ fun CounterParent() {
     ) {
         // Child composables receive state and callbacks as parameters
         CounterDisplay(count = count)
-        CounterButton(onIncrement = { count++ })
+        CounterIncButton(onIncrement = { count++ })
+        CounterDecButton(onDeIncrement = { count --})
     }
 }
 
@@ -88,14 +90,27 @@ fun CounterDisplay(count: Int) {
 }
 
 /**
- * CounterButton is a stateless composable that provides the increment functionality.
+ * CounterIncButton is a stateless composable that provides the increment functionality.
  * It receives a callback function (onIncrement) as a parameter.
  * When clicked, it triggers the callback to update the parent's state.
  */
 @Composable
-fun CounterButton(onIncrement: () -> Unit) {
+fun CounterIncButton(onIncrement: () -> Unit) {
     Button(onClick = onIncrement) {
         Text("Increment")
+    }
+
+}
+
+/**
+ * CounterDecButton is a stateless composable that provides the increment functionality.
+ * It receives a callback function (onDeIncrement) as a parameter.
+ * When clicked, it triggers the callback to update the parent's state.
+ */
+@Composable
+fun CounterDecButton(onDeIncrement: () -> Unit){
+    Button(onClick = onDeIncrement){
+        Text("DeIncrement")
     }
 }
 

@@ -7,19 +7,13 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 
 // Compose UI imports
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,131 +24,152 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavController
+import androidx.compose.ui.unit.dp
+
+// Navigation imports
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 
+/**
+ * MainActivity is the entry point of the application.
+ * It sets up the basic window configuration and initializes the Compose UI.
+ */
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Configure the window to use light status bar icons
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
-        // Set up the Compose UI with Material Design theme
+        // Set up the Compose UI with navigation
         setContent {
             MaterialTheme {
                 Surface {
-                    MainScreen()
+                    NavigationWithArgs()
                 }
             }
         }
     }
 }
 
-// NavigationRoutes.kt
-object NavigationRoutes {
-    const val HOME = "home"
-    const val PROFILE = "profile"
-    const val SETTINGS = "settings"
-}
-
-// BottomNavigation.kt
+/**
+ * NavigationWithArgs sets up the navigation structure of the app with argument passing.
+ * It demonstrates how to:
+ * 1. Pass arguments between screens using navigation routes
+ * 2. Define typed arguments in the navigation graph
+ * 3. Extract and use arguments in the destination screens
+ *
+ * The navigation uses a pattern of "profile/{userId}" where {userId} is a dynamic parameter
+ * that gets passed to the profile screen.
+ */
 @Composable
-fun BottomNavigationBar(navController: NavController) {
-    val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-
-    NavigationBar {
-        NavigationBarItem(
-            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
-            label = { Text("Home") },
-            selected = currentRoute == NavigationRoutes.HOME,
-            onClick = {
-                navController.navigate(NavigationRoutes.HOME) {
-                    launchSingleTop = true
-                }
-            }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Filled.Person, contentDescription = "Profile") },
-            label = { Text("Profile") },
-            selected = currentRoute == NavigationRoutes.PROFILE,
-            onClick = {
-                navController.navigate(NavigationRoutes.PROFILE) {
-                    launchSingleTop = true
-                }
-            }
-        )
-        NavigationBarItem(
-            icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
-            label = { Text("Settings") },
-            selected = currentRoute == NavigationRoutes.SETTINGS,
-            onClick = {
-                navController.navigate(NavigationRoutes.SETTINGS) {
-                    launchSingleTop = true
-                }
-            }
-        )
-    }
-}
-
-
-
-// MainScreen.kt
-@Composable
-fun MainScreen() {
+fun NavigationWithArgs() {
     val navController = rememberNavController()
 
-    Scaffold(
-        bottomBar = { BottomNavigationBar(navController) }
-    ) { paddingValues ->
-        NavHost(
-            navController = navController,
-            startDestination = NavigationRoutes.HOME,
-            modifier = Modifier.padding(paddingValues)
-        ) {
-            composable(NavigationRoutes.HOME) { HomeScreen() }
-            composable(NavigationRoutes.PROFILE) { ProfileScreen() }
-            composable(NavigationRoutes.SETTINGS) { SettingsScreen() }
+    NavHost(
+        navController = navController,
+        startDestination = "home"
+    ) {
+        // Home screen route - starting point of the navigation
+        composable("home") {
+            HomeScreen(
+                onNavigateToProfile = { data ->
+                    // Navigate to profile screen with a userId parameter
+                    // The route will be constructed as "profile/user123"
+                    navController.navigate("enteredText/$data")
+                }
+            )
+        }
+
+        // Profile screen route with argument
+        // The {data} in the route is a placeholder for the actual user ID
+        composable(
+            route = "enteredText/{data}",
+            // Define the argument type as String
+            arguments = listOf(
+                navArgument("data") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            // Extract the data argument from the navigation back stack entry
+            val data = backStackEntry.arguments?.getString("data")
+            DisplayTextScreen(
+                data = data,
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
 
+/**
+ * HomeScreen displays the main screen of the application.
+ * It contains a button that navigates to a specific user's profile.
+ *
+ * @param onNavigateToProfile Callback function that takes a userId parameter
+ *                          and handles navigation to the profile screen
+ */
 @Composable
-fun HomeScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
+    var text by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 50.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
-        Text("Home Screen")
+        OutlinedTextField(
+            value = text,
+            onValueChange = {text = it},
+                label = { Text("Enter text")}
+        )
+        // Button that triggers navigation with a hardcoded user ID
+        // In a real app, this would typically come from a user selection or authentication
+        Button(onClick = { onNavigateToProfile(text) }) {
+            Text("Send text to display text screen")
+        }
     }
 }
 
+/**
+ * DisplayTextScreen displays the profile information for a specific user.
+ * It shows the content the user passed through navigation and provides a way to go back.
+ *
+ * @param data The data the user entered.
+ * @param onNavigateBack Callback function to handle navigation back to the home screen
+ */
 @Composable
-fun ProfileScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun DisplayTextScreen(
+    data: String?,
+    onNavigateBack: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 50.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
     ) {
-        Text("Profile Screen")
+        // Display the user ID passed through navigation
+        Text("Entered Text: $data")
+        Button(onClick = onNavigateBack) {
+            Text("Go Back")
+        }
     }
 }
 
-@Composable
-fun SettingsScreen() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Settings Screen")
-    }
-}
-
+/**
+ * Preview function to see the UI in Android Studio's preview pane.
+ * This allows developers to see how the navigation and screens look without running the app.
+ * Note: The preview might not show the actual navigation behavior as it's static.
+ */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun MainScreenPreview() {
+fun NewsFeedExamplePreview() {
     MaterialTheme {
-        MainScreen()
+        NavigationWithArgs()
     }
 }

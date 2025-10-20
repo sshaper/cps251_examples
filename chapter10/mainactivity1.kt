@@ -89,7 +89,7 @@ fun CounterScreen() {
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun AnimatedCardPreview() {
+fun CounterScreenPreview() {
     MaterialTheme {
         CounterScreen()
     }
