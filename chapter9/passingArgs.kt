@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
  * 2. Define typed arguments in the navigation graph
  * 3. Extract and use arguments in the destination screens
  *
- * The navigation uses a pattern of "profile/{userId}" where {userId} is a dynamic parameter
+ * The navigation uses a pattern of "enteredText/{data}" where {data} is a dynamic parameter
  * that gets passed to the profile screen.
  */
 @Composable
@@ -77,7 +77,7 @@ fun NavigationWithArgs() {
             HomeScreen(
                 onNavigateToProfile = { data ->
                     // Navigate to profile screen with a userId parameter
-                    // The route will be constructed as "profile/user123"
+                    // The route will be constructed as "enteredText/$data"
                     navController.navigate("enteredText/$data")
                 }
             )
@@ -94,7 +94,7 @@ fun NavigationWithArgs() {
         ) { backStackEntry ->
             // Extract the data argument from the navigation back stack entry
             val data = backStackEntry.arguments?.getString("data")
-            DisplayTextScreen(
+            ProfileScreen(
                 data = data,
                 onNavigateBack = {
                     navController.popBackStack()
@@ -124,25 +124,25 @@ fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
         OutlinedTextField(
             value = text,
             onValueChange = {text = it},
-                label = { Text("Enter text")}
+            label = { Text("Enter text")}
         )
         // Button that triggers navigation with a hardcoded user ID
         // In a real app, this would typically come from a user selection or authentication
         Button(onClick = { onNavigateToProfile(text) }) {
-            Text("Send text to display text screen")
+            Text("Send text to profile screen")
         }
     }
 }
 
 /**
- * DisplayTextScreen displays the profile information for a specific user.
+ * ProfileScreen displays the profile information for a specific user.
  * It shows the content the user passed through navigation and provides a way to go back.
  *
  * @param data The data the user entered.
  * @param onNavigateBack Callback function to handle navigation back to the home screen
  */
 @Composable
-fun DisplayTextScreen(
+fun ProfileScreen(
     data: String?,
     onNavigateBack: () -> Unit
 ) {

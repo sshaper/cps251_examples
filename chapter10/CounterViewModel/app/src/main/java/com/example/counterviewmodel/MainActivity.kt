@@ -14,7 +14,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.example.counterviewmodel.screens.CounterScreen
 import com.example.counterviewmodel.ui.theme.CounterViewModelTheme
 
-//import screens and viewmodels
 
 
 
