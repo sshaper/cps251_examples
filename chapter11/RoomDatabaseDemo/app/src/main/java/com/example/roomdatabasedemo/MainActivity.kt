@@ -17,23 +17,30 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.view.WindowCompat
 import com.example.roomdatabasedemo.ui.theme.RoomDatabaseDemoTheme
 
+// MainActivity is the entry point of the Android application.
 class MainActivity : ComponentActivity() {
+    // onCreate is called when the activity is first created.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons
+        // Configure the window to use light status bar icons for a modern look.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
+        // Initialize the ViewModel using by viewModels.
+        // The provideFactory method ensures the ViewModel has access to the application context.
         val viewModel: NoteViewModel by viewModels {
             NoteViewModel.provideFactory(application)
         }
 
-        // Set up the Compose UI
+        // Set up the Compose UI content for this activity.
         setContent {
+            // Apply the custom theme for the application.
             MaterialTheme {
+                // Surface is a fundamental composable that applies background color and fills the screen.
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // Display the NoteScreen, passing the initialized ViewModel to it.
                     NoteScreen(viewModel)
                 }
             }
@@ -41,13 +48,3 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun RoomDatabaseDemo() {
-
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun GreetingPreview() {
-    RoomDatabaseDemo()
-}
