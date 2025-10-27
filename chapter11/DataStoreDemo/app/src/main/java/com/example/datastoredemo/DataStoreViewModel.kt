@@ -12,6 +12,16 @@ import kotlinx.coroutines.launch
 // (PreferencesManager). It exposes preference data as StateFlows for the UI to observe
 // and provides functions to update those preferences, abstracting away the underlying
 // DataStore operations.
+//
+// Key Concepts:
+// - `viewModelScope`: A CoroutineScope tied to the ViewModel's lifecycle. Any coroutines launched
+//   within this scope will be automatically cancelled when the ViewModel is cleared (e.g., when the
+//   associated UI is destroyed). This prevents memory leaks and ensures background tasks don't run
+//   unnecessarily.
+// - `.launch`: A coroutine builder function used to start a new coroutine. It's used for "fire-and-forget"
+//   tasks where you don't need to await a direct result immediately. It returns a `Job` object
+//   which can be used for cancellation, though `viewModelScope` handles this automatically for its
+//   child coroutines.
 class DataStoreViewModel(application: Application) : AndroidViewModel(application) {
     
     // An instance of PreferencesManager to interact with DataStore for reading and writing preferences.
