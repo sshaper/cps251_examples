@@ -30,21 +30,12 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    DataStoreDemo()
+                    val viewModel: DataStoreViewModel = viewModel()
+                    DataStoreScreen(viewModel = viewModel)
                 }
             }
         }
     }
 }
 
-@Composable
-fun DataStoreDemo() {
-    val viewModel: DataStoreViewModel = viewModel()
-    DataStoreScreen(viewModel = viewModel)
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun GreetingPreview() {
-    DataStoreDemo()
-}
+/*Beause of passing the view model I did not do a preview*/
