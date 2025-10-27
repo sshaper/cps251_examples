@@ -14,26 +14,42 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+// This Composable function represents the UI screen where users can view and modify
+// application settings managed by DataStore. It observes preferences from the ViewModel
+// and provides interactive elements (text fields, switches, buttons) to update them.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DataStoreScreen(
+    // The ViewModel instance providing access to preference data and update functions.
     viewModel: DataStoreViewModel,
+    // Modifier for customizing the layout and appearance of the screen.
     modifier: Modifier = Modifier.padding(top=50.dp)
 ) {
+    // Collects the userName StateFlow from the ViewModel as a Compose State.
+    // `by` keyword allows direct access to the String value.
+    // The UI recomposes automatically whenever userName changes.
     val userName by viewModel.userName.collectAsState()
+    // Collects the darkMode StateFlow from the ViewModel as a Compose State.
+    // The UI recomposes automatically whenever darkMode changes.
     val darkMode by viewModel.darkMode.collectAsState()
+    // Collects the fontSize StateFlow from the ViewModel as a Compose State.
+    // The UI recomposes automatically whenever fontSize changes.
     val fontSize by viewModel.fontSize.collectAsState()
+    // Collects the notifications StateFlow from the ViewModel as a Compose State.
+    // The UI recomposes automatically whenever notifications changes.
     val notifications by viewModel.notifications.collectAsState()
     
+    // Local state for the new user name input field.
     var newUserName by remember { mutableStateOf("") }
     
+    // LazyColumn is used for efficient rendering of a scrollable list of settings.
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            // Header
+            // Header section of the screen, displaying the app title and description.
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -58,7 +74,7 @@ fun DataStoreScreen(
         }
         
         item {
-            // Current Settings Display
+            // Displays the current settings retrieved from DataStore.
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -101,7 +117,7 @@ fun DataStoreScreen(
         }
         
         item {
-            // Settings Controls
+            // Section for interactive controls to change the settings.
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -116,7 +132,7 @@ fun DataStoreScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // User Name with Text Field
+                    // User Name input field and change button.
                     Column {
                         Text(
                             text = "User Name:",
@@ -152,7 +168,7 @@ fun DataStoreScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Dark Mode
+                    // Dark Mode toggle switch.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -170,7 +186,7 @@ fun DataStoreScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Font Size with Simple Vertical Buttons
+                    // Font Size selection with multiple buttons.
                     Column {
                         Text(
                             text = "Font Size:",
@@ -200,7 +216,7 @@ fun DataStoreScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Notifications
+                    // Notifications toggle switch.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -220,7 +236,7 @@ fun DataStoreScreen(
         }
         
         item {
-            // Clear All Settings
+            // Section to clear all preferences and reset to default values.
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -260,7 +276,7 @@ fun DataStoreScreen(
         }
         
         item {
-            // Instructions
+            // Instructions on how to test the persistence of DataStore settings.
             Card(
                 modifier = Modifier.fillMaxWidth()
             ) {
