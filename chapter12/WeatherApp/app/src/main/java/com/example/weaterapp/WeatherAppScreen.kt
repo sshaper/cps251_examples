@@ -27,15 +27,22 @@ import com.example.weaterapp.data.WeatherRepository
 import com.example.weaterapp.util.NetworkUtils
 import kotlinx.coroutines.launch
 
+/**
+ * Main composable function for the Weather App screen.
+ * Manages UI state and coordinates weather data fetching with caching support.
+ */
 @Composable
 fun WeatherApp() {
     val context = LocalContext.current
     val repository = remember { WeatherRepository(context) }
+    
+    // UI state variables
     var zip by remember { mutableStateOf("") }
     var weather by remember { mutableStateOf<WeatherEntity?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
     var loading by remember { mutableStateOf(false) }
     var fromCache by remember { mutableStateOf(false) }
+    
     val coroutineScope = rememberCoroutineScope()
     val apiKey = "80d537a4b4cd7a3b10a3c65a70316965"
 
@@ -63,8 +70,8 @@ fun WeatherApp() {
                         error = null
                         fromCache = false
                         coroutineScope.launch {
+                            // Step 1: Show cached data instantly if available (optimistic UI)
                             try {
-                                // Always show cache instantly if available
                                 val cached = repository.getWeather(zip, apiKey, forceCache = true)
                                 weather = cached
                                 fromCache = true
@@ -72,7 +79,8 @@ fun WeatherApp() {
                                 weather = null
                                 fromCache = false
                             }
-                            // Then try to update from network if online
+                            
+                            // Step 2: Update from network if online, otherwise show error
                             if (NetworkUtils.isOnline(context)) {
                                 try {
                                     val entity = repository.getWeather(zip, apiKey)
@@ -91,6 +99,8 @@ fun WeatherApp() {
             ) {
                 Text("Get Weather")
             }
+            
+            // Display error message if any
             if (error != null) {
                 Text(
                     text = error!!,
@@ -99,6 +109,8 @@ fun WeatherApp() {
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
+            
+            // Show loading indicator or weather data
             when {
                 loading -> CircularProgressIndicator()
                 weather != null -> WeatherDisplayCached(weather!!, fromCache)
@@ -107,6 +119,10 @@ fun WeatherApp() {
     }
 }
 
+/**
+ * Displays weather information including temperature, description, and humidity.
+ * Shows a cache indicator when displaying cached data.
+ */
 @Composable
 fun WeatherDisplayCached(weather: WeatherEntity, fromCache: Boolean) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
