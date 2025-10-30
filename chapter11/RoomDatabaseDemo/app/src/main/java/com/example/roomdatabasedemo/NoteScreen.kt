@@ -68,7 +68,7 @@ fun NoteScreen(viewModel: NoteViewModel) {
                             viewModel.addNote(title, content, dateFormat.format(Date()))
                             scope.launch { snackbarHostState.showSnackbar("Note added!") }
                         } else {
-                            // If editing, delete the old note and add a new one with updated content.
+                            // If editing,
                             viewModel.deleteNote(editingNote!!)
                             viewModel.addNote(title, content, dateFormat.format(Date()))
                             editingNote = null
