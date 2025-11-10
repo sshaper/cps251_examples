@@ -7,21 +7,27 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 
 // Compose UI imports
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.layout.width
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -42,7 +48,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // Surface provides a background color and elevation for the content
                 Surface {
-                    CustomThemeExample()
+                    AnimatedCardExample()
                 }
             }
         }
@@ -50,70 +56,90 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * CustomThemeExample demonstrates how to create and apply a custom Material Design theme.
- * This composable shows:
- * 1. Custom color scheme definition using lightColorScheme
- * 2. Application of custom colors to Material components
- * 3. Proper use of Material Design typography
+ * AnimatedCardExample demonstrates various animation capabilities in Compose:
+ * 1. Color animation using animateColorAsState
+ * 2. Size animation using animateDpAsState
+ * 3. Elevation animation using animateDpAsState
+ * 4. Content visibility animation using AnimatedVisibility
+ * 5. Content crossfade animation using Crossfade
  *
- * The custom theme uses:
- * - Primary color: Deep Purple (0xFF6200EE)
- * - Secondary color: Teal (0xFF03DAC6)
- *
- * The layout demonstrates:
- * - Centered content using Column with Arrangement.Center
- * - Proper use of Material Design color system
- * - Typography styles from Material Design
+ * The card features:
+ * - Expands/collapses on click
+ * - Changes color smoothly
+ * - Changes elevation
+ * - Changes width
+ * - Shows/hides content with animation
+ * - Crossfades between different text states
  */
 @Composable
-fun CustomThemeExample() {
-    // Define custom colors for the Material theme
-    val customColors = lightColorScheme(
-        primary = Color(0xFF6200EE),    // Deep Purple
-        secondary = Color(0xFF03DAC6)   // Teal
+fun AnimatedCardExample() {
+    // State variables for animations
+    var expanded by remember { mutableStateOf(false) }
+    var showDetails by remember { mutableStateOf(false) }
+
+    // Animated values
+    val cardColor by animateColorAsState(
+        targetValue = if (expanded) Color(0xFFBBDEFB) else Color.White,
+        label = "cardColor"
+    )
+    val cardElevation by animateDpAsState(
+        targetValue = if (expanded) 26.dp else 4.dp,
+        label = "cardElevation"
+    )
+    val cardWidth by animateDpAsState(
+        targetValue = if (expanded) 300.dp else 200.dp,
+        label = "cardWidth"
     )
 
-    // Apply the custom color scheme to the Material theme
-    MaterialTheme(
-        colorScheme = customColors
+    // Card with animated properties
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = cardColor
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = cardElevation
+        ),
+        modifier = Modifier
+            .width(cardWidth)
+            .padding(16.dp)
+            .padding(top=50.dp)
+            .clickable {
+                expanded = !expanded
+                showDetails = expanded
+            }
     ) {
-        // Main content column with centered alignment
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            // Welcome text using Material Design typography and primary color
+        Column(modifier = Modifier.padding(16.dp)) {
             Text(
-                text = "Welcome!",
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.headlineMedium
+                text = "Tap to ${if (expanded) "collapse" else "expand"}",
+                style = MaterialTheme.typography.titleLarge
             )
 
-            // Primary action button using the theme's primary color
-            Button(onClick = { /* TODO: Implement button action */ }) {
-                Text("Primary Action")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(onClick = { /* Do something else */ }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)) {
-                Text("Secondary Action (using secondary color)")
+            // Animated visibility for additional content
+            AnimatedVisibility(visible = expanded) {
+                Column {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    // Crossfade animation between states
+                    Crossfade(targetState = showDetails) { detailsVisible ->
+                        if (detailsVisible) {
+                            Text("Here are more details! This text fades in.")
+                        } else {
+                            Text("Tap to see more details.")
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 /**
- * Preview composable for the CustomThemeExample.
+ * Preview composable for the AnimatedCardExample.
  * This allows viewing the UI in Android Studio's preview pane without running the app.
- * showBackground and showSystemUi parameters enable a realistic preview with system UI elements.
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun CustomThemeExamplePreview() {
+fun AnimatedCardPreview() {
     MaterialTheme {
-        CustomThemeExample()
+        AnimatedCardExample()
     }
 }
-

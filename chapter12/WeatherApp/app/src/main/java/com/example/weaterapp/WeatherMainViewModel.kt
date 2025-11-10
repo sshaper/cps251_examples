@@ -28,7 +28,7 @@ class WeatherMainViewModel(
 ) : ViewModel() {
     
     // API key for OpenWeatherMap API
-    private val apiKey = "80d537a4b4cd7a3b10a3c65a70316965"
+    private val apiKey = "xxxxxxx"
     
     // Private mutable state flows
     private val _zipcode = MutableStateFlow("")
