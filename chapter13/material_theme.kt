@@ -1,4 +1,4 @@
-package com.example.book
+package com.example.bookexamplesapp
 
 // Core Android imports
 import android.os.Bundle
@@ -111,7 +111,7 @@ fun CustomThemeExample() {
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun NewsFeedExamplePreview() {
+fun CustomThemeExamplePreview() {
     MaterialTheme {
         CustomThemeExample()
     }

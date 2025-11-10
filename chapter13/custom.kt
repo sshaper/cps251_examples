@@ -1,4 +1,4 @@
-package com.example.book
+package com.example.bookexamplesapp
 
 // Core Android imports
 import android.os.Bundle
@@ -94,7 +94,7 @@ fun CustomButtonExample() {
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun NewsFeedExamplePreview() {
+fun CustomButtonExamplePreview() {
     MaterialTheme {
         CustomButtonExample()
     }

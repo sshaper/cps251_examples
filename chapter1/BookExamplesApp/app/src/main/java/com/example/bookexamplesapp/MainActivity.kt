@@ -7,16 +7,23 @@ import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
 
 // Compose UI imports
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
@@ -35,7 +42,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // Surface provides a background color and elevation for the content
                 Surface {
-                    StyleExample()
+                    CustomThemeExample()
                 }
             }
         }
@@ -43,72 +50,70 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * StyleExample demonstrates Material Design 3 styling capabilities including:
- * 1. Card styling with custom shape and colors
- * 2. Typography system usage
- * 3. Color system integration
- * 4. Button styling with Material shapes
+ * CustomThemeExample demonstrates how to create and apply a custom Material Design theme.
+ * This composable shows:
+ * 1. Custom color scheme definition using lightColorScheme
+ * 2. Application of custom colors to Material components
+ * 3. Proper use of Material Design typography
  *
- * The composable shows:
- * - A card with extra-large shape and secondary container color
- * - Proper use of Material Design typography for different text styles
- * - Color system usage for text and backgrounds
- * - Styled button with Material Design shape
+ * The custom theme uses:
+ * - Primary color: Deep Purple (0xFF6200EE)
+ * - Secondary color: Teal (0xFF03DAC6)
+ *
+ * The layout demonstrates:
+ * - Centered content using Column with Arrangement.Center
+ * - Proper use of Material Design color system
+ * - Typography styles from Material Design
  */
 @Composable
-fun StyleExample() {
-    MaterialTheme {
-        // Main card container with custom styling
-        Card(
-            // Use extra-large shape from Material Design shape system
-            shape = MaterialTheme.shapes.extraLarge,
-            // Use secondary container color from Material Design color system
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            ),
+fun CustomThemeExample() {
+    // Define custom colors for the Material theme
+    val customColors = lightColorScheme(
+        primary = Color(0xFF6200EE),    // Deep Purple
+        secondary = Color(0xFF03DAC6)   // Teal
+    )
+
+    // Apply the custom color scheme to the Material theme
+    MaterialTheme(
+        colorScheme = customColors
+    ) {
+        // Main content column with centered alignment
+        Column(
             modifier = Modifier
-                .padding(16.dp)
-                .padding(top = 50.dp)
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Content column with proper padding
-            Column(
-                modifier = Modifier.padding(24.dp)
-            ) {
-                // Title text using Material Design typography
-                Text(
-                    text = "Big Title",
-                    style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.primary
-                )
+            // Welcome text using Material Design typography and primary color
+            Text(
+                text = "Welcome!",
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.headlineMedium
+            )
 
-                // Body text using Material Design typography
-                Text(
-                    text = "This is body text.",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-
-                // Styled button using Material Design shape
-                Button(
-                    onClick = { /* TODO: Implement button action */ },
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Text("Styled Button")
-                }
+            // Primary action button using the theme's primary color
+            Button(onClick = { /* TODO: Implement button action */ }) {
+                Text("Primary Action")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Button(onClick = { /* Do something else */ }, colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)) {
+                Text("Secondary Action (using secondary color)")
             }
         }
     }
 }
 
 /**
- * Preview composable for the StyleExample.
+ * Preview composable for the CustomThemeExample.
  * This allows viewing the UI in Android Studio's preview pane without running the app.
  * showBackground and showSystemUi parameters enable a realistic preview with system UI elements.
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun NewsFeedExamplePreview() {
+fun CustomThemeExamplePreview() {
     MaterialTheme {
-        StyleExample()
+        CustomThemeExample()
     }
 }
+

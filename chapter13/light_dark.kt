@@ -1,4 +1,4 @@
-package com.example.book
+package com.example.bookexamplesapp
 
 // Core Android imports
 import android.os.Bundle
@@ -105,7 +105,7 @@ fun LightDarkModeExample() {
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun NewsFeedExamplePreview() {
+fun LightDarkModeExamplePreview() {
     MaterialTheme {
         LightDarkModeExample()
     }

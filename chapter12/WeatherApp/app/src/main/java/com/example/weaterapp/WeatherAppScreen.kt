@@ -13,38 +13,47 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.weaterapp.data.WeatherEntity
 import com.example.weaterapp.data.WeatherRepository
-import com.example.weaterapp.util.NetworkUtils
-import kotlinx.coroutines.launch
 
 /**
  * Main composable function for the Weather App screen.
- * Manages UI state and coordinates weather data fetching with caching support.
+ * 
+ * This composable follows the MVVM pattern:
+ * - UI (Composable) observes state from ViewModel using collectAsState()
+ * - Business logic and state management are handled by WeatherMainViewModel
+ * - Data fetching is delegated to WeatherRepository through the ViewModel
+ * 
+ * The UI is now focused solely on displaying data and handling user interactions,
+ * while all business logic lives in the ViewModel.
  */
 @Composable
 fun WeatherApp() {
     val context = LocalContext.current
+    
+    // Create repository instance (persisted across recompositions)
     val repository = remember { WeatherRepository(context) }
     
-    // UI state variables
-    var zip by remember { mutableStateOf("") }
-    var weather by remember { mutableStateOf<WeatherEntity?>(null) }
-    var error by remember { mutableStateOf<String?>(null) }
-    var loading by remember { mutableStateOf(false) }
-    var fromCache by remember { mutableStateOf(false) }
+    // Create ViewModel using factory pattern with dependency injection
+    val viewModel: WeatherMainViewModel = viewModel(
+        factory = WeatherMainViewModel.provideFactory(repository, context)
+    )
     
-    val coroutineScope = rememberCoroutineScope()
-    val apiKey = "80d537a4b4cd7a3b10a3c65a70316965"
+    // Collect state from ViewModel using collectAsState()
+    // These automatically trigger recomposition when state changes
+    val zipcode by viewModel.zipcode.collectAsState()
+    val weather by viewModel.weather.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val loading by viewModel.loading.collectAsState()
+    val fromCache by viewModel.fromCache.collectAsState()
 
     Box(
         modifier = Modifier
@@ -56,61 +65,33 @@ fun WeatherApp() {
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Zipcode input field - bound to ViewModel state
             OutlinedTextField(
-                value = zip,
-                onValueChange = { zip = it },
+                value = zipcode,
+                onValueChange = { viewModel.onZipcodeChange(it) },
                 label = { Text("Enter zip code (e.g. 48197,us)") },
                 singleLine = true
             )
             Spacer(modifier = Modifier.height(16.dp))
+            
+            // Button triggers ViewModel to fetch weather
             Button(
-                onClick = {
-                    if (zip.isNotBlank()) {
-                        loading = true
-                        error = null
-                        fromCache = false
-                        coroutineScope.launch {
-                            // Step 1: Show cached data instantly if available (optimistic UI)
-                            try {
-                                val cached = repository.getWeather(zip, apiKey, forceCache = true)
-                                weather = cached
-                                fromCache = true
-                            } catch (_: Exception) {
-                                weather = null
-                                fromCache = false
-                            }
-                            
-                            // Step 2: Update from network if online, otherwise show error
-                            if (NetworkUtils.isOnline(context)) {
-                                try {
-                                    val entity = repository.getWeather(zip, apiKey)
-                                    weather = entity
-                                    fromCache = false
-                                } catch (e: Exception) {
-                                    error = "Could not update weather from network. Showing cached data if available."
-                                }
-                            } else {
-                                error = "Offline: showing cached data if available."
-                            }
-                            loading = false
-                        }
-                    }
-                }
+                onClick = { viewModel.fetchWeather() }
             ) {
                 Text("Get Weather")
             }
             
-            // Display error message if any
-            if (error != null) {
+            // Display error message if any (from ViewModel state)
+            error?.let { errorMessage ->
                 Text(
-                    text = error!!,
+                    text = errorMessage,
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Show loading indicator or weather data
+            // Show loading indicator or weather data (from ViewModel state)
             when {
                 loading -> CircularProgressIndicator()
                 weather != null -> WeatherDisplayCached(weather!!, fromCache)

@@ -13,6 +13,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
@@ -22,11 +23,15 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -68,7 +73,9 @@ fun GestureAnimationTabScreen() {
         "Visibility",
         "Long Press",
         "Slider",
-        "Multi-Touch"
+        "Multi-Touch",
+        "Rearrange",
+        "Tile Swap"
     )
     var selectedTab by remember { mutableStateOf(0) }
 
@@ -105,6 +112,8 @@ fun GestureAnimationTabScreen() {
                 4 -> LongPressScaleExample()
                 5 -> InteractiveSliderExample()
                 6 -> MultiGestureCardExample()
+                7 -> RearrangeExample()
+                8 -> TileSwapExample()
             }
         }
     }
@@ -112,8 +121,12 @@ fun GestureAnimationTabScreen() {
 
 // 1. Tap Animation Example
 /**
- * Demonstrates a button that animates (scales down) when tapped.
- * Uses pointerInput to detect press and animateFloatAsState for scaling.
+ * Demonstrates a button-styled card that provides visual feedback when tapped.
+ * When pressed, the button scales down to 95% of its size and changes color
+ * from primary to primaryContainer. When released, it animates back to its
+ * original size and color. Uses detectTapGestures with pointerInput to detect
+ * press events, animateFloatAsState for smooth scale animation, and
+ * animateColorAsState for color transitions.
  */
 @Composable
 fun TapAnimationExample() {
@@ -122,8 +135,14 @@ fun TapAnimationExample() {
         targetValue = if (isPressed) 0.95f else 1f,
         animationSpec = tween(durationMillis = 100), label = "tapScale"
     )
-    Button(
-        onClick = { /* Handle click */ },
+    val buttonColor by animateColorAsState(
+        targetValue = if (isPressed) 
+            MaterialTheme.colorScheme.primaryContainer 
+        else 
+            MaterialTheme.colorScheme.primary,
+        animationSpec = tween(durationMillis = 100), label = "tapColor"
+    )
+    Card(
         modifier = Modifier
             .scale(scale)
             .pointerInput(Unit) {
@@ -137,9 +156,23 @@ fun TapAnimationExample() {
                         }
                     }
                 )
-            }
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = buttonColor
+        ),
+        shape = MaterialTheme.shapes.medium
     ) {
-        Text("Tap Me!")
+        Box(
+            modifier = Modifier
+                .padding(horizontal = 24.dp, vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = "Tap Me!",
+                color = MaterialTheme.colorScheme.onPrimary,
+                style = MaterialTheme.typography.labelLarge
+            )
+        }
     }
 }
 
@@ -415,6 +448,248 @@ fun MultiGestureCardExample() {
             Text("Pinch, rotate, and drag me!")
         }
     }
+}
+
+// 8. Rearrange Example
+/**
+ * Demonstrates 5 boxes that can be rearranged by drag and drop.
+ * Uses detectDragGestures to handle dragging and calculates new positions.
+ * Provides visual feedback (elevation, opacity, scale) while dragging.
+ */
+@Composable
+fun RearrangeExample() {
+    var items by remember { mutableStateOf((1..5).map { "Box $it" }) }
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffset by remember { mutableStateOf(Offset.Zero) }
+    val boxHeight = 80.dp
+    val density = LocalDensity.current
+    
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        items.forEachIndexed { index, item ->
+            val isDragging = draggedIndex == index
+            val animatedOffset by animateOffsetAsState(
+                targetValue = if (isDragging) dragOffset else Offset.Zero,
+                animationSpec = if (isDragging) {
+                    tween(durationMillis = 0)
+                } else {
+                    spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                }, label = "rearrangeOffset"
+            )
+            val scale by animateFloatAsState(
+                targetValue = if (isDragging) 1.05f else 1f,
+                animationSpec = tween(durationMillis = 200), label = "rearrangeScale"
+            )
+            val alpha by animateFloatAsState(
+                targetValue = if (isDragging) 0.8f else 1f,
+                animationSpec = tween(durationMillis = 200), label = "rearrangeAlpha"
+            )
+            
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(boxHeight)
+                    .padding(vertical = 4.dp)
+                    .offset { IntOffset(animatedOffset.x.roundToInt(), animatedOffset.y.roundToInt()) }
+                    .scale(scale)
+                    .alpha(alpha)
+                    .shadow(
+                        elevation = if (isDragging) 8.dp else 2.dp,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    .background(
+                        color = MaterialTheme.colorScheme.primaryContainer,
+                        shape = MaterialTheme.shapes.medium
+                    )
+                    .pointerInput(index) {
+                        detectDragGestures(
+                            onDragStart = {
+                                draggedIndex = index
+                                dragOffset = Offset.Zero
+                            },
+                            onDragEnd = {
+                                // Calculate new position based on drag distance
+                                val boxHeightPx = with(density) { boxHeight.toPx() }
+                                val newIndex = when {
+                                    dragOffset.y < -boxHeightPx / 2 && index > 0 -> index - 1
+                                    dragOffset.y > boxHeightPx / 2 && index < items.size - 1 -> index + 1
+                                    else -> index
+                                }
+                                
+                                if (newIndex != index) {
+                                    val newItems = items.toMutableList()
+                                    val itemToMove = newItems.removeAt(index)
+                                    newItems.add(newIndex, itemToMove)
+                                    items = newItems
+                                }
+                                
+                                draggedIndex = null
+                                dragOffset = Offset.Zero
+                            },
+                            onDrag = { change, dragAmount ->
+                                change.consume()
+                                dragOffset += Offset(dragAmount.x, dragAmount.y)
+                            }
+                        )
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = item,
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+    }
+}
+
+// 9. Tile Swap Example
+/**
+ * Demonstrates a simple 2x2 tile swap game.
+ * Drag tiles to swap with the empty space (only adjacent tiles can swap).
+ * Uses detectDragGestures, grid layout, and adjacency checking.
+ * Provides visual feedback while dragging.
+ */
+@Composable
+fun TileSwapExample() {
+    var tiles by remember { mutableStateOf(listOf(1, 2, 3, 0)) } // 0 represents empty space
+    var draggedIndex by remember { mutableStateOf<Int?>(null) }
+    var dragOffset by remember { mutableStateOf(Offset.Zero) }
+    val gridSize = 2 // 2x2 grid
+    
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        Text(
+            text = "Drag tiles to swap with empty space",
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+        
+        // 2x2 Grid layout
+        Column(
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            repeat(gridSize) { row ->
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    repeat(gridSize) { col ->
+                        val index = row * gridSize + col
+                        val tileValue = tiles[index]
+                        val isDragging = draggedIndex == index
+                        
+                        val animatedOffset by animateOffsetAsState(
+                            targetValue = if (isDragging) dragOffset else Offset.Zero,
+                            animationSpec = if (isDragging) {
+                                tween(durationMillis = 0)
+                            } else {
+                                spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                            }, label = "tileOffset"
+                        )
+                        
+                        val scale by animateFloatAsState(
+                            targetValue = if (isDragging) 1.1f else 1f,
+                            animationSpec = tween(durationMillis = 200), label = "tileScale"
+                        )
+                        
+                        val alpha by animateFloatAsState(
+                            targetValue = if (isDragging) 0.8f else 1f,
+                            animationSpec = tween(durationMillis = 200), label = "tileAlpha"
+                        )
+                        
+                        if (tileValue == 0) {
+                            // Empty space
+                            Box(
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                            )
+                        } else {
+                            // Tile with number
+                            Card(
+                                modifier = Modifier
+                                    .size(100.dp)
+                                    .offset { IntOffset(animatedOffset.x.roundToInt(), animatedOffset.y.roundToInt()) }
+                                    .scale(scale)
+                                    .alpha(alpha)
+                                    .shadow(
+                                        elevation = if (isDragging) 8.dp else 4.dp,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                    .pointerInput(index) {
+                                        detectDragGestures(
+                                            onDragStart = {
+                                                draggedIndex = index
+                                                dragOffset = Offset.Zero
+                                            },
+                                            onDragEnd = {
+                                                // Find empty space index
+                                                val emptyIndex = tiles.indexOf(0)
+                                                
+                                                // Check if dragged tile is adjacent to empty space
+                                                if (isAdjacent(index, emptyIndex, gridSize)) {
+                                                    // Swap tiles
+                                                    val newTiles = tiles.toMutableList()
+                                                    newTiles[emptyIndex] = tiles[index]
+                                                    newTiles[index] = 0
+                                                    tiles = newTiles
+                                                }
+                                                
+                                                draggedIndex = null
+                                                dragOffset = Offset.Zero
+                                            },
+                                            onDrag = { change, dragAmount ->
+                                                change.consume()
+                                                dragOffset += Offset(dragAmount.x, dragAmount.y)
+                                            }
+                                        )
+                                    },
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = tileValue.toString(),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Helper function to check if two indices are adjacent in a grid.
+ */
+private fun isAdjacent(index1: Int, index2: Int, gridSize: Int): Boolean {
+    val row1 = index1 / gridSize
+    val col1 = index1 % gridSize
+    val row2 = index2 / gridSize
+    val col2 = index2 % gridSize
+    
+    // Adjacent if same row and columns differ by 1, or same column and rows differ by 1
+    return (row1 == row2 && kotlin.math.abs(col1 - col2) == 1) ||
+           (col1 == col2 && kotlin.math.abs(row1 - row2) == 1)
 }
 
 /**

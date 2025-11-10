@@ -1,4 +1,4 @@
-package com.example.book
+package com.example.bookexamplesapp
 
 // Core Android imports
 import android.os.Bundle

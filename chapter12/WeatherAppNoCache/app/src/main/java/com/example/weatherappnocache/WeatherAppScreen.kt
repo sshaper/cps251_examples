@@ -11,25 +11,28 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
-import kotlinx.coroutines.launch
-
+import com.example.weatherappnocache.api.RetrofitClient
 
 
 @Composable
-fun WeatherAppScreen(weatherViewModel: WeatherViewModel = viewModel()) {
-    var zipcode by remember { mutableStateOf("") }
-    val weatherResponse by weatherViewModel.weatherResponse
-    val errorMessage by weatherViewModel.errorMessage
+fun WeatherAppScreen() {
+    val weatherApiService = RetrofitClient.weatherApiService
+    val weatherRepository = remember { WeatherRepository(weatherApiService) }
+    val weatherViewModel: WeatherViewModel = viewModel(
+        factory = WeatherViewModel.provideFactory(weatherRepository)
+    )
+
+    // Collect states from the ViewModel
+    val zipcode by weatherViewModel.zipcode.collectAsState()
+    val weatherResponse by weatherViewModel.weatherResponse.collectAsState()
+    val errorMessage by weatherViewModel.errorMessage.collectAsState()
 
     Column(
         modifier = Modifier
@@ -40,13 +43,13 @@ fun WeatherAppScreen(weatherViewModel: WeatherViewModel = viewModel()) {
     ) {
         OutlinedTextField(
             value = zipcode,
-            onValueChange = { zipcode = it },
+            onValueChange = { weatherViewModel.onZipcodeChange(it) },
             label = { Text("Enter Zip Code") },
             singleLine = true,
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        Button(onClick = { weatherViewModel.fetchWeather(zipcode) }) {
+        Button(onClick = { weatherViewModel.fetchWeather() }) {
             Text("Get Weather")
         }
 
