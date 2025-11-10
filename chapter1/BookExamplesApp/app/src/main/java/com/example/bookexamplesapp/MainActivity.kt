@@ -11,13 +11,18 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +33,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -48,7 +54,15 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // Surface provides a background color and elevation for the content
                 Surface {
-                    AnimatedCardExample()
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp)
+                    ) {
+                        AnimatedCardExample()
+                        Spacer(modifier = Modifier.height(32.dp))
+                        AnimatedBoxExample()
+                    }
                 }
             }
         }
@@ -133,6 +147,70 @@ fun AnimatedCardExample() {
 }
 
 /**
+ * AnimatedBoxExample demonstrates the use of animationSpec with tween().
+ * This example shows a simple box that animates its size when clicked.
+ *
+ * Features:
+ * - Uses animateDpAsState with a custom animationSpec
+ * - animationSpec with tween() allows control over duration and easing
+ * - Box smoothly animates between small and large sizes
+ * - Color also animates to provide visual feedback
+ */
+@Composable
+fun AnimatedBoxExample() {
+    // State variable to track if box is expanded
+    var isExpanded by remember { mutableStateOf(false) }
+
+    // Animated size using animationSpec with tween()
+    // tween() allows us to specify duration in milliseconds
+    val boxSize by animateDpAsState(
+        targetValue = if (isExpanded) 150.dp else 80.dp,
+        animationSpec = tween(
+            durationMillis = 500, // Animation duration: 500ms
+            // easing = FastOutSlowInEasing (default) - starts fast, ends slow
+        ),
+        label = "boxSize"
+    )
+
+    // Animated color for visual feedback
+    val boxColor by animateColorAsState(
+        targetValue = if (isExpanded) Color(0xFF4CAF50) else Color(0xFF2196F3),
+        animationSpec = tween(durationMillis = 500),
+        label = "boxColor"
+    )
+
+    Column(
+        modifier = Modifier.padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Tap the box to animate!",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 16.dp)
+        )
+
+        // Animated box
+        Box(
+            modifier = Modifier
+                .size(boxSize)
+                .background(
+                    color = boxColor,
+                    shape = RoundedCornerShape(12.dp)
+                )
+                .clickable {
+                    isExpanded = !isExpanded
+                }
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = if (isExpanded) "Tap to shrink" else "Tap to expand",
+            style = MaterialTheme.typography.bodySmall
+        )
+    }
+}
+
+/**
  * Preview composable for the AnimatedCardExample.
  * This allows viewing the UI in Android Studio's preview pane without running the app.
  */
@@ -140,6 +218,14 @@ fun AnimatedCardExample() {
 @Composable
 fun AnimatedCardPreview() {
     MaterialTheme {
-        AnimatedCardExample()
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
+            AnimatedCardExample()
+            Spacer(modifier = Modifier.height(32.dp))
+            AnimatedBoxExample()
+        }
     }
 }
