@@ -51,6 +51,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * MainActivity is the entry point of the app.
@@ -104,6 +108,81 @@ fun CustomButton(
     }
 }
 
+
+
+// --- Loading Spinner Example ---
+/**
+ * A reusable loading spinner with a message.
+ * @param message The message to display below the spinner.
+ * @param modifier Modifier for styling and layout.
+ */
+@Composable
+fun LoadingSpinner(
+    message: String = "Loading...",
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(48.dp),
+            color = MaterialTheme.colorScheme.primary
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = message,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+
+// --- Custom Text Field Example ---
+/**
+ * A custom text field with error handling.
+ * @param value The current text value.
+ * @param onValueChange Callback for text changes.
+ * @param label The label to display.
+ * @param modifier Modifier for styling and layout.
+ * @param isError Whether the field is in an error state.
+ * @param errorMessage The error message to display (if any).
+ * @param singleLine Whether the text field is single line.
+ */
+@Composable
+fun CustomTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    label: String,
+    modifier: Modifier = Modifier,
+    isError: Boolean = false,
+    errorMessage: String? = null,
+    singleLine: Boolean = true
+) {
+    Column(modifier = modifier) {
+        OutlinedTextField(
+            value = value,
+            onValueChange = onValueChange,
+            label = { Text(label) },
+            isError = isError,
+            singleLine = singleLine,
+            modifier = Modifier.fillMaxWidth()
+        )
+        if (isError && errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
+            )
+        }
+    }
+}
+
+
+
 // --- Info Card Example ---
 /**
  * A card displaying an icon, title, and description.
@@ -153,75 +232,10 @@ fun InfoCard(
     }
 }
 
-// --- Loading Spinner Example ---
-/**
- * A reusable loading spinner with a message.
- * @param message The message to display below the spinner.
- * @param modifier Modifier for styling and layout.
- */
-@Composable
-fun LoadingSpinner(
-    message: String = "Loading...",
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.size(48.dp),
-            color = MaterialTheme.colorScheme.primary
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = message,
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
 
-// --- Custom Text Field Example ---
-/**
- * A custom text field with error handling.
- * @param value The current text value.
- * @param onValueChange Callback for text changes.
- * @param label The label to display.
- * @param modifier Modifier for styling and layout.
- * @param isError Whether the field is in an error state.
- * @param errorMessage The error message to display (if any).
- * @param singleLine Whether the text field is single line.
- */
-@Composable
-fun CustomTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    modifier: Modifier = Modifier,
-    isError: Boolean = false,
-    errorMessage: String? = null,
-    singleLine: Boolean = true
-) {
-    Column(modifier = modifier) {
-        OutlinedTextField(
-            value = value,
-            onValueChange = onValueChange,
-            label = { Text(label) },
-            isError = isError,
-            singleLine = singleLine,
-            modifier = Modifier.fillMaxWidth()
-        )
-        if (isError && errorMessage != null) {
-            Text(
-                text = errorMessage,
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(start = 16.dp, top = 4.dp)
-            )
-        }
-    }
-}
+
+
+
 
 // --- Expandable Card Example ---
 /**
@@ -339,6 +353,7 @@ fun CombinedExampleScreen() {
     var emailError by remember { mutableStateOf(false) }
     // State for loading spinner
     var loading by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -357,16 +372,17 @@ fun CombinedExampleScreen() {
             text = if (loading) "Loading..." else "Submit",
             onClick = {
                 emailError = email.isBlank() || !email.contains("@")
-                if (!emailError) loading = true
+                if (!emailError) {
+                    loading = true
+                    coroutineScope.launch {
+                        delay(5000L) // It's good practice to use 'L' for Long
+                        loading = false
+                    }
+                } // <-- This closing brace was also missing
             },
             enabled = !loading
         )
-        // Info Card
-        InfoCard(
-            title = "Weather",
-            description = "Partly cloudy, 72°F",
-            icon = Icons.Default.Cloud
-        )
+
         // Loading Spinner (shows only if loading)
         if (loading) {
             LoadingSpinner(
@@ -374,6 +390,7 @@ fun CombinedExampleScreen() {
                 modifier = Modifier.fillMaxWidth()
             )
         }
+
         // Custom Text Field
         CustomTextField(
             value = email,
@@ -382,6 +399,15 @@ fun CombinedExampleScreen() {
             isError = emailError,
             errorMessage = if (emailError) "Please enter a valid email" else null
         )
+
+        // Info Card
+        InfoCard(
+            title = "Weather",
+            description = "Partly cloudy, 72°F",
+            icon = Icons.Default.Cloud
+        )
+
+
         // Expandable Card
         ExpandableCard(
             title = "How to use this app",
@@ -396,6 +422,9 @@ fun CombinedExampleScreen() {
             title = "Note",
             message = "Your changes have been saved successfully."
         )
+    
+
+        
     }
 }
 
@@ -407,4 +436,3 @@ fun CombinedExampleScreen() {
 fun MyScreenPreview() {
     CombinedExampleScreen()
 }
-
