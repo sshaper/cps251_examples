@@ -69,7 +69,7 @@ fun MainScreen(modifier: Modifier = Modifier) {
 
 /**
  * ClickableTextExample demonstrates basic text interaction in Compose.
- * It shows a text that changes its content when clicked.
+ * It shows a text that toggles its content when clicked.
  * Uses remember and mutableStateOf to maintain the clicked state.
  */
 @Composable
@@ -80,7 +80,7 @@ fun ClickableTextExample() {
         text = if (clicked) "You clicked the text!" else "Click this text",
         modifier = Modifier
             .padding(16.dp)
-            .clickable { clicked = true }
+            .clickable { clicked = !clicked }
     )
 }
 
@@ -111,6 +111,10 @@ fun ButtonClickExample() {
  * - Shows the currently selected tag
  * 
  * Uses FlowRow for automatic wrapping of tags when they don't fit in one line.
+ * The composable reads selectedTag (e.g. in tag == selectedTag and in the “Selected tag” text). 
+ * In Compose, when state that a composable reads changes, that composable is recomposed: the whole function runs again.
+ * So the FlowRow { ... } and the tags.forEach { ... } run again.
+ * This is why the tags are redisplayed when the selected tag changes.
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
