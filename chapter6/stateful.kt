@@ -1,4 +1,3 @@
-package com.example.book
 
 // Android framework imports
 import android.os.Bundle
@@ -40,7 +39,7 @@ class MainActivity : ComponentActivity() {
 /**
  * MainScreen is the root composable that serves as the container for the app's content.
  * It provides the basic layout structure and spacing for the app's UI elements.
- * 
+ *
  * @param modifier Optional Modifier to customize the layout behavior
  */
 @Composable
@@ -57,12 +56,12 @@ fun MainScreen(modifier: Modifier = Modifier) {
 /**
  * ProfileInfo is a stateless composable that displays user information.
  * It follows the principle of separation of concerns by only handling display logic.
- * 
+ *
  * @param name The user's name to display
- * @param age The user's age to display
+ * @param age The user's age to display (as string)
  */
 @Composable
-fun ProfileInfo(name: String, age: Int) {
+fun ProfileInfo(name: String, age: String) {
     Column(
         modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
@@ -82,16 +81,14 @@ fun ProfileInfo(name: String, age: Int) {
 /**
  * EditableProfile is a stateful composable that implements a profile editing system.
  * It demonstrates several key Compose concepts:
- * 1. State Management: Uses multiple state variables to track editing mode and user data
- * 2. Unidirectional Data Flow: State is managed at the top and passed down to child composables
- * 3. User Interaction: Handles editing mode toggle and form input
- * 4. Form Validation: Includes basic validation for age input
- * 
+ * 1. State Management: Uses state for editing mode and profile data (name, age)
+ * 2. Unidirectional Data Flow: State is held here and passed down to ProfileInfo and the text fields
+ * 3. User Interaction: A button toggles edit mode; when editing, name and age are edited in place
+ *
  * State Variables:
- * - isEditing: Controls whether the profile is in edit mode
- * - name: Stores the current name value
- * - age: Stores the current age value
- * - tempName/tempAge: Temporary storage for form input before saving
+ * - isEditing: Controls whether the profile is in edit mode (shows/hides the text fields)
+ * - name: The current name (displayed and edited directly in the form)
+ * - age: The current age as string (displayed and edited directly in the form)
  */
 @Composable
 fun EditableProfile() {
@@ -100,11 +97,8 @@ fun EditableProfile() {
 
     // State management for profile data
     var name by remember { mutableStateOf("John") }
-    var age by remember { mutableStateOf(20) }
+    var age by remember { mutableStateOf("20") }
 
-    // State management for form input
-    var tempName by remember { mutableStateOf(name) }
-    var tempAge by remember { mutableStateOf(age.toString()) }
 
     Column(
         modifier = Modifier
@@ -117,20 +111,9 @@ fun EditableProfile() {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Edit/Save button with state-dependent behavior
+        // Button toggles edit mode; label shows "Save" when editing, "Edit" when not
         Button(onClick = {
-            if (isEditing) {
-                // Save changes and validate input
-                name = tempName
-                age = tempAge.toIntOrNull() ?: age
-                tempName = ""
-                tempAge = ""
-            } else {
-                // Initialize edit mode with current values
-                tempName = name
-                tempAge = age.toString()
-            }
-            isEditing = !isEditing
+           isEditing = !isEditing
         }) {
             Text(if (isEditing) "Save" else "Edit")
         }
@@ -141,18 +124,18 @@ fun EditableProfile() {
 
             // Name input field
             OutlinedTextField(
-                value = tempName,
-                onValueChange = { tempName = it },
+                value = name,
+                onValueChange = { name = it },
                 label = { Text("Name") },
                 modifier = Modifier.fillMaxWidth()
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Age input field with validation
+            // Age input field
             OutlinedTextField(
-                value = tempAge,
-                onValueChange = { tempAge = it },
+                value = age,
+                onValueChange = { age = it },
                 label = { Text("Age") },
                 modifier = Modifier.fillMaxWidth()
             )
