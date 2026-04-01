@@ -15,4 +15,4 @@ class NoteRepository(private val noteDao: NoteDao) {
     // Suspended function to delete an existing note from the database.
     // Marked as suspend because Room operations are asynchronous.
     suspend fun delete(note: Note) = noteDao.delete(note)
-} 
+}

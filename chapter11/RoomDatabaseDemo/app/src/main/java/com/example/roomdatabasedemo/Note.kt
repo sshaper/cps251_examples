@@ -15,4 +15,4 @@ data class Note(
     val content: String,
     // The date when the note was created or last updated.
     val date: String
-) 
+)

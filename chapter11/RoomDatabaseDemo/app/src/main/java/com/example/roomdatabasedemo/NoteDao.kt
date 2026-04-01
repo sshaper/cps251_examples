@@ -21,4 +21,4 @@ interface NoteDao {
     // 'suspend' keyword indicates that this is a coroutine function.
     @Delete
     suspend fun delete(note: Note)
-} 
+}

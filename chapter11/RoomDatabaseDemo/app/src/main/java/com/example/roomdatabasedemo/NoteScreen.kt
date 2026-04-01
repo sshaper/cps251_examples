@@ -174,4 +174,4 @@ fun NoteScreen(viewModel: NoteViewModel) {
             )
         }
     }
-} 
+}
