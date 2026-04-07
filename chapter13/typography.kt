@@ -1,12 +1,10 @@
-package com.example.bookexamplesapp
+package com.example.bookexampleapp
 
-// Core Android imports
+
+// Compose UI imports
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
-
-// Compose UI imports
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -19,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import com.example.bookexampleapp.ui.theme.BookExampleAppTheme
 
 /**
  * MainActivity is the entry point of the application.
@@ -29,10 +29,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI with Material Design theme
         setContent {
-            MaterialTheme {
+            BookExampleAppTheme{
                 // Surface provides a background color and elevation for the content
                 Surface {
                     StyleExample()
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
  * 2. Typography system usage
  * 3. Color system integration
  * 4. Button styling with Material shapes
- * 
+ *
  * The composable shows:
  * - A card with extra-large shape and secondary container color
  * - Proper use of Material Design typography for different text styles
@@ -57,7 +57,7 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun StyleExample() {
-    MaterialTheme {
+
         // Main card container with custom styling
         Card(
             // Use extra-large shape from Material Design shape system
@@ -80,14 +80,14 @@ fun StyleExample() {
                     style = MaterialTheme.typography.headlineLarge,
                     color = MaterialTheme.colorScheme.primary
                 )
-                
+
                 // Body text using Material Design typography
                 Text(
                     text = "This is body text.",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-                
+
                 // Styled button using Material Design shape
                 Button(
                     onClick = { /* TODO: Implement button action */ },
@@ -98,7 +98,7 @@ fun StyleExample() {
             }
         }
     }
-}
+
 
 /**
  * Preview composable for the StyleExample.
@@ -108,7 +108,7 @@ fun StyleExample() {
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun StyleExamplePreview() {
-    MaterialTheme {
+    BookExampleAppTheme {
         StyleExample()
     }
 }

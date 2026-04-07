@@ -1,17 +1,13 @@
 package com.example.bookexamplesapp
 
-// Core Android imports
+// Compose UI imports
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.core.view.WindowCompat
-
-// Compose UI imports
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -19,9 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.view.WindowCompat
 
 /**
  * MainActivity is the entry point of the application.
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         // Configure the window to use light status bar icons for better visibility
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
-        
+
         // Set up the Compose UI with Material Design theme
         setContent {
             MaterialTheme {
@@ -50,13 +51,13 @@ class MainActivity : ComponentActivity() {
  * 1. Automatic theme switching based on system settings
  * 2. Dynamic color scheme application
  * 3. Proper use of Material Design color system for both light and dark modes
- * 
+ *
  * The composable:
  * - Detects system theme using isSystemInDarkTheme()
  * - Applies appropriate color scheme (light or dark)
  * - Updates UI elements to reflect current theme
  * - Uses proper color tokens for text and backgrounds
- * 
+ *
  * Key features:
  * - Responsive to system theme changes
  * - Uses Material Design color system
@@ -66,11 +67,12 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun LightDarkModeExample() {
     // Detect current system theme
-    val isDarkTheme = isSystemInDarkTheme()
-    
+    val systemInDark = isSystemInDarkTheme()
+    var isDarkTheme by remember { mutableStateOf(systemInDark) }
+
     // Select appropriate color scheme based on theme
     val colors = if (isDarkTheme) darkColorScheme() else lightColorScheme()
-    
+
     // Apply the selected color scheme to Material theme
     MaterialTheme(colorScheme = colors) {
         // Full-screen surface with theme-appropriate background color
@@ -88,9 +90,9 @@ fun LightDarkModeExample() {
                     text = if (isDarkTheme) "Dark Mode" else "Light Mode",
                     color = MaterialTheme.colorScheme.onBackground
                 )
-                
+
                 // Theme-aware button
-                Button(onClick = { /* TODO: Implement theme toggle action */ }) {
+                Button(onClick = { isDarkTheme = !isDarkTheme }) {
                     Text("Try Me!")
                 }
             }
