@@ -4,7 +4,6 @@ package com.example.bookexamplesapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 
 // Compose layout imports
 import androidx.compose.foundation.layout.Column
@@ -17,12 +16,15 @@ import androidx.compose.foundation.layout.Spacer
 // Material Design 3 imports
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 
 // Compose runtime imports
@@ -36,10 +38,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 
 // Android system imports
 import androidx.core.view.WindowCompat
-import com.example.bookexamplesapp.ui.theme.BookExamplesAppTheme
 
 /**
  * MainActivity - The entry point of the application
@@ -64,18 +69,42 @@ class MainActivity : ComponentActivity() {
 
 
 /**
- * MyScreen - Main screen composable that demonstrates Bottom Sheets and Dialogs
- * 
- * This screen contains:
- * - Two buttons to trigger different UI overlays
- * - State management for showing/hiding overlays
- * - Integration between bottom sheet and dialog
+ * Main screen composable that demonstrates Bottom Sheets and Dialogs.
+ *
+ * **Overlays:** Four buttons each flip a boolean so the matching overlay is composed only while
+ * needed (bottom sheet, delete confirmation, list-style dialog, date picker).
+ *
+ * **Selection summary (text field):** Instead of a transient `Toast`, this screen keeps results in
+ * remembered `String` state (one variable each for the bottom sheet, list dialog, and date
+ * picker). Callbacks from those overlays assign the chosen text or formatted date. A derived
+ * `selectionSummary` string concatenates labeled lines for anything that is non-empty, or a
+ * placeholder until the user picks something. That string is the `value` of a read-only
+ * [OutlinedTextField] (`readOnly = true`, no-op `onValueChange`) so selections stay visible on the
+ * main screen and update whenever state changes.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyScreen() {
     // State variables to control the visibility of overlays
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showOptionsSheet by remember { mutableStateOf(false) }
+    var showListOptionsDialog by remember { mutableStateOf(false) }
+    var showDatePickerDialog by remember { mutableStateOf(false) }
+
+    // Persist each overlay’s result in its own string; the read-only text field below displays them.
+    var bottomSheetSelection by remember { mutableStateOf("") }
+    var listOptionSelection by remember { mutableStateOf("") }
+    var dateSelection by remember { mutableStateOf("") }
+
+    // Single block of text for the OutlinedTextField: labeled lines, or a placeholder until any selection exists.
+    val selectionSummary = buildString {
+        val hasAny =
+            bottomSheetSelection.isNotEmpty() || listOptionSelection.isNotEmpty() || dateSelection.isNotEmpty()
+        if (bottomSheetSelection.isNotEmpty()) appendLine("Bottom sheet: $bottomSheetSelection")
+        if (listOptionSelection.isNotEmpty()) appendLine("List option: $listOptionSelection")
+        if (dateSelection.isNotEmpty()) appendLine("Date: $dateSelection")
+        if (!hasAny) append("Selections will appear here.")
+    }.trimEnd()
 
     // Main content column with buttons
     Column(
@@ -89,10 +118,37 @@ fun MyScreen() {
             Text("Show Options")
         }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
         // Button to show the delete confirmation dialog directly
         Button(onClick = { showDeleteDialog = true }) {
             Text("Delete Item")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = { showListOptionsDialog = true }) {
+            Text("List options dialog")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(onClick = { showDatePickerDialog = true }) {
+            Text("Date picker")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Read-only: value comes only from selectionSummary state updated by overlay callbacks above.
+        OutlinedTextField(
+            value = selectionSummary,
+            onValueChange = {},
+            readOnly = true,
+            modifier = Modifier.fillMaxWidth(),
+            minLines = 4,
+            maxLines = 8,
+            label = { Text("Selections") }
+        )
     }
 
     // Conditional rendering of the options bottom sheet
@@ -101,7 +157,7 @@ fun MyScreen() {
         OptionsBottomSheet(
             onDismiss = { showOptionsSheet = false },
             onOptionSelected = { option ->
-                // Handle the selected option from the bottom sheet
+                bottomSheetSelection = option
                 when (option) {
                     "Delete" -> showDeleteDialog = true // Chain to dialog
                     "Edit" -> { /* Handle edit action */ }
@@ -123,6 +179,43 @@ fun MyScreen() {
             },
             onDismiss = { showDeleteDialog = false }
         )
+    }
+
+    if (showListOptionsDialog) {
+        ListOptionsDialog(
+            onDismiss = { showListOptionsDialog = false },
+            onOptionSelected = { option -> listOptionSelection = option }
+        )
+    }
+
+    if (showDatePickerDialog) {
+        val datePickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        dateSelection =
+                            datePickerState.selectedDateMillis?.let { millis ->
+                                val sdf = SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).apply {
+                                    timeZone = TimeZone.getTimeZone("UTC")
+                                }
+                                sdf.format(Date(millis))
+                            } ?: "No date selected"
+                        showDatePickerDialog = false
+                    }
+                ) {
+                    Text("OK")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePickerDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        ) {
+            DatePicker(state = datePickerState)
+        }
     }
 }
 
@@ -166,9 +259,8 @@ fun OptionsBottomSheet(
             listOf("Edit", "Share", "Delete", "Report").forEach { option ->
                 TextButton(
                     onClick = { 
-                        // When an option is selected:
-                        onOptionSelected(option) // Notify parent of selection
-                        onDismiss() // Close the bottom sheet
+                        onOptionSelected(option)
+                        onDismiss()
                     },
                     modifier = Modifier.fillMaxWidth() // Make button full width
                 ) {
@@ -211,6 +303,42 @@ fun DeleteConfirmationDialog(
         },
         dismissButton = {
             // Button that cancels the action (safe action)
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+/**
+ * Alert dialog that shows several choices as a vertical list of tappable rows.
+ * The parent can read the choice from [onOptionSelected] and display it (for example in a text field).
+ */
+@Composable
+fun ListOptionsDialog(
+    onDismiss: () -> Unit,
+    onOptionSelected: (String) -> Unit = {}
+) {
+    val options = listOf("Small", "Medium", "Large", "Extra large")
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose a size") },
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                options.forEach { option ->
+                    TextButton(
+                        onClick = {
+                            onOptionSelected(option)
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(option)
+                    }
+                }
+            }
+        },
+        confirmButton = {
             TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }

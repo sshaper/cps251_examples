@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.DrawerValue
@@ -54,55 +55,77 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/** Which main area is shown: tabbed news sections, or a full-screen Home / Settings from the drawer. */
+private enum class MainSection { Tabs, Home, Settings }
+
 /**
  * AppWithDrawerAndTabs demonstrates a layout with a navigation drawer and a tab row.
  * - The navigation drawer slides in from the left and contains navigation items.
  * - The top app bar contains a menu icon to open the drawer.
  * - The tab row allows switching between three content screens.
+ * - Drawer items Home and Settings swap the body to dedicated pages (same idea as tab content).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppWithDrawerAndTabs() {
-    // State for the navigation drawer (open/closed)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    // Coroutine scope for opening/closing the drawer
     val scope = rememberCoroutineScope()
-    // State for the currently selected tab
     var selectedTab by remember { mutableStateOf(0) }
-    // Use enough tabs so horizontal scrolling is visible
-    val tabs = listOf(
-        "News", "Sports", "Weather"
-    )
+    var mainSection by remember { mutableStateOf(MainSection.Tabs) }
+    val tabs = listOf("News", "Sports", "Weather")
 
-    // ModalNavigationDrawer provides the side drawer UI
+    fun closeDrawer() {
+        scope.launch { drawerState.close() }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            // Drawer content: app name and navigation items
             ModalDrawerSheet {
                 Text("News App", modifier = Modifier.padding(16.dp))
                 NavigationDrawerItem(
+                    icon = { Icon(Icons.Filled.List, contentDescription = null) },
+                    label = { Text("News, Sports & Weather") },
+                    selected = mainSection == MainSection.Tabs,
+                    onClick = {
+                        mainSection = MainSection.Tabs
+                        closeDrawer()
+                    }
+                )
+                NavigationDrawerItem(
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
                     label = { Text("Home") },
-                    selected = false,
-                    onClick = { /* Handle Home navigation */ }
+                    selected = mainSection == MainSection.Home,
+                    onClick = {
+                        mainSection = MainSection.Home
+                        closeDrawer()
+                    }
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
                     label = { Text("Settings") },
-                    selected = false,
-                    onClick = { /* Handle Settings navigation */ }
+                    selected = mainSection == MainSection.Settings,
+                    onClick = {
+                        mainSection = MainSection.Settings
+                        closeDrawer()
+                    }
                 )
             }
         }
     ) {
-        // Scaffold provides the top app bar and main content area
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("News App") },
+                    title = {
+                        Text(
+                            when (mainSection) {
+                                MainSection.Home -> "Home"
+                                MainSection.Settings -> "Settings"
+                                MainSection.Tabs -> "News App"
+                            }
+                        )
+                    },
                     navigationIcon = {
-                        // Menu icon opens the navigation drawer
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menu")
                         }
@@ -110,31 +133,59 @@ fun AppWithDrawerAndTabs() {
                 )
             }
         ) { padding ->
-            // Main content: tab row and content for the selected tab
             Column(modifier = Modifier.padding(padding)) {
-                // TabRow lets tabs scroll horizontally
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    
-                ) {
-                    tabs.forEachIndexed { index, title ->
-                        Tab(
-                            selected = selectedTab == index,
-                            onClick = { selectedTab = index },
-                            text = { Text(title) }
-                        )
+                if (mainSection == MainSection.Tabs) {
+                    TabRow(selectedTabIndex = selectedTab) {
+                        tabs.forEachIndexed { index, title ->
+                            Tab(
+                                selected = selectedTab == index,
+                                onClick = { selectedTab = index },
+                                text = { Text(title) }
+                            )
+                        }
                     }
-                }
-
-                // Show content based on the selected tab
-                when (selectedTab) {
-                    0 -> NewsContent()
-                    1 -> SportsContent()
-                    2 -> WeatherContent()
-
+                    when (selectedTab) {
+                        0 -> NewsContent()
+                        1 -> SportsContent()
+                        2 -> WeatherContent()
+                    }
+                } else if (mainSection == MainSection.Home) {
+                    HomeContent()
+                } else {
+                    SettingsContent()
                 }
             }
         }
+    }
+}
+
+/**
+ * HomeContent is shown when the user chooses Home in the drawer (same pattern as tab bodies).
+ */
+@Composable
+fun HomeContent() {
+    Column(modifier = Modifier.fillMaxSize().padding(32.dp)) {
+        Text("Home", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Welcome to the Home screen.",
+            modifier = Modifier.padding(top = 8.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
+    }
+}
+
+/**
+ * SettingsContent is shown when the user chooses Settings in the drawer.
+ */
+@Composable
+fun SettingsContent() {
+    Column(modifier = Modifier.fillMaxSize().padding(32.dp)) {
+        Text("Settings", style = MaterialTheme.typography.headlineMedium)
+        Text(
+            "Adjust your preferences here.",
+            modifier = Modifier.padding(top = 8.dp),
+            style = MaterialTheme.typography.bodyLarge
+        )
     }
 }
 

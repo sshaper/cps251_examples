@@ -43,6 +43,8 @@ import androidx.compose.ui.unit.round
 import androidx.compose.ui.tooling.preview.Preview
 import kotlin.math.roundToInt
 import androidx.core.view.WindowCompat
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /**
  * MainActivity is the entry point of the app.
@@ -203,14 +205,24 @@ fun TapAnimationExample() {
 fun SwipeToDeleteExample() {
     // State holding a list of items that can be deleted
     var items by remember { mutableStateOf((1..3).map { "Item $it" }.toMutableList()) }
+    val scope = rememberCoroutineScope()
     Column {
         // Display each item as a swipeable list item
         items.forEach { item ->
-            SwipeableListItem(
-                item = item,
-                onDelete = { items.remove(item) } // Remove item from list when deleted
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            key(item) {
+                SwipeableListItem(
+                    item = item,
+                    onDelete = {
+                        scope.launch {
+                            delay(250) // Let dismiss animation/background settle briefly before removal.
+                            val updatedItems = items.toMutableList()
+                            updatedItems.remove(item)
+                            items = updatedItems
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
