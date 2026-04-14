@@ -106,6 +106,7 @@ fun MyScreen() {
                     "Delete" -> showDeleteDialog = true // Chain to dialog
                     "Edit" -> { /* Handle edit action */ }
                     "Share" -> { /* Handle share action */ }
+                    "Report" -> { /* Handle report action */ }
                 }
             }
         )
