@@ -4,38 +4,47 @@ package com.example.bookexamplesapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.DrawerValue
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
+import com.example.bookexamplesapp.ui.theme.BookExamplesAppTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDrawerState
+import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 /**
@@ -55,77 +64,53 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** Which main area is shown: tabbed news sections, or a full-screen Home / Settings from the drawer. */
-private enum class MainSection { Tabs, Home, Settings }
-
 /**
  * AppWithDrawerAndTabs demonstrates a layout with a navigation drawer and a tab row.
  * - The navigation drawer slides in from the left and contains navigation items.
  * - The top app bar contains a menu icon to open the drawer.
  * - The tab row allows switching between three content screens.
- * - Drawer items Home and Settings swap the body to dedicated pages (same idea as tab content).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AppWithDrawerAndTabs() {
+    // State for the navigation drawer (open/closed)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    // Coroutine scope for opening/closing the drawer
     val scope = rememberCoroutineScope()
+    // State for the currently selected tab
     var selectedTab by remember { mutableStateOf(0) }
-    var mainSection by remember { mutableStateOf(MainSection.Tabs) }
+    // List of tab titles
     val tabs = listOf("News", "Sports", "Weather")
-
-    fun closeDrawer() {
-        scope.launch { drawerState.close() }
-    }
-
+    
+    // ModalNavigationDrawer provides the side drawer UI
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
+            // Drawer content: app name and navigation items
             ModalDrawerSheet {
                 Text("News App", modifier = Modifier.padding(16.dp))
                 NavigationDrawerItem(
-                    icon = { Icon(Icons.Filled.List, contentDescription = null) },
-                    label = { Text("News, Sports & Weather") },
-                    selected = mainSection == MainSection.Tabs,
-                    onClick = {
-                        mainSection = MainSection.Tabs
-                        closeDrawer()
-                    }
-                )
-                NavigationDrawerItem(
                     icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
                     label = { Text("Home") },
-                    selected = mainSection == MainSection.Home,
-                    onClick = {
-                        mainSection = MainSection.Home
-                        closeDrawer()
-                    }
+                    selected = false,
+                    onClick = { /* Handle Home navigation */ }
                 )
                 NavigationDrawerItem(
                     icon = { Icon(Icons.Filled.Settings, contentDescription = "Settings") },
                     label = { Text("Settings") },
-                    selected = mainSection == MainSection.Settings,
-                    onClick = {
-                        mainSection = MainSection.Settings
-                        closeDrawer()
-                    }
+                    selected = false,
+                    onClick = { /* Handle Settings navigation */ }
                 )
             }
         }
     ) {
+        // Scaffold provides the top app bar and main content area
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = {
-                        Text(
-                            when (mainSection) {
-                                MainSection.Home -> "Home"
-                                MainSection.Settings -> "Settings"
-                                MainSection.Tabs -> "News App"
-                            }
-                        )
-                    },
+                    title = { Text("News App") },
                     navigationIcon = {
+                        // Menu icon opens the navigation drawer
                         IconButton(onClick = { scope.launch { drawerState.open() } }) {
                             Icon(Icons.Filled.Menu, contentDescription = "Menu")
                         }
@@ -133,59 +118,27 @@ fun AppWithDrawerAndTabs() {
                 )
             }
         ) { padding ->
+            // Main content: tab row and content for the selected tab
             Column(modifier = Modifier.padding(padding)) {
-                if (mainSection == MainSection.Tabs) {
-                    TabRow(selectedTabIndex = selectedTab) {
-                        tabs.forEachIndexed { index, title ->
-                            Tab(
-                                selected = selectedTab == index,
-                                onClick = { selectedTab = index },
-                                text = { Text(title) }
-                            )
-                        }
+                // TabRow displays the tabs at the top
+                TabRow(selectedTabIndex = selectedTab) {
+                    tabs.forEachIndexed { index, title ->
+                        Tab(
+                            selected = selectedTab == index,
+                            onClick = { selectedTab = index },
+                            text = { Text(title) }
+                        )
                     }
-                    when (selectedTab) {
-                        0 -> NewsContent()
-                        1 -> SportsContent()
-                        2 -> WeatherContent()
-                    }
-                } else if (mainSection == MainSection.Home) {
-                    HomeContent()
-                } else {
-                    SettingsContent()
+                }
+                
+                // Show content based on the selected tab
+                when (selectedTab) {
+                    0 -> NewsContent()
+                    1 -> SportsContent()
+                    2 -> WeatherContent()
                 }
             }
         }
-    }
-}
-
-/**
- * HomeContent is shown when the user chooses Home in the drawer (same pattern as tab bodies).
- */
-@Composable
-fun HomeContent() {
-    Column(modifier = Modifier.fillMaxSize().padding(32.dp)) {
-        Text("Home", style = MaterialTheme.typography.headlineMedium)
-        Text(
-            "Welcome to the Home screen.",
-            modifier = Modifier.padding(top = 8.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
-/**
- * SettingsContent is shown when the user chooses Settings in the drawer.
- */
-@Composable
-fun SettingsContent() {
-    Column(modifier = Modifier.fillMaxSize().padding(32.dp)) {
-        Text("Settings", style = MaterialTheme.typography.headlineMedium)
-        Text(
-            "Adjust your preferences here.",
-            modifier = Modifier.padding(top = 8.dp),
-            style = MaterialTheme.typography.bodyLarge
-        )
     }
 }
 
@@ -218,9 +171,6 @@ fun WeatherContent() {
         Text("Weather Content", style = MaterialTheme.typography.headlineMedium)
     }
 }
-
-
-
 
 /**
  * Preview function for the main screen. Allows you to see the UI in Android Studio's preview.
