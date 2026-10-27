@@ -36,10 +36,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
+// Chapter 9: bottom bar with three destination items.
+// Run this file separately from the other examples: each defines MainActivity
+// and its own NavigationRoutes/screens in the same package.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request a light status bar appearance: dark icons on a light background
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
         // Set up the Compose UI with Material Design theme
@@ -53,25 +56,37 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// NavigationRoutes.kt
+// Shared route names used by the graph, click actions, and selection comparisons.
+// object provides a single holder; const val defines compile-time string constants.
+// These comments describe roles within this standalone file, not extra required files.
 object NavigationRoutes {
     const val HOME = "home"
     const val PROFILE = "profile"
     const val SETTINGS = "settings"
 }
 
-// BottomNavigation.kt
+// The bar displays selection; NavigationBarItem does not navigate by itself.
+// Each onClick below supplies the navigation action.
 @Composable
 fun BottomNavigationBar(navController: NavController) {
+    // Observe the controller's current entry as Compose State. Reading .value
+    // makes this composable respond when navigation changes that entry, including Back.
+    // destination.route identifies which item should look selected. Safe calls handle
+    // an absent entry/route while navigation is being initialized; no route then matches.
+    // A local selected-index variable could drift away from the actual destination.
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
 
     NavigationBar {
+        // The label is visible; the icon also has a description for accessibility.
         NavigationBarItem(
             icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
             label = { Text("Home") },
+            // Material draws the selected appearance from this Boolean.
             selected = currentRoute == NavigationRoutes.HOME,
             onClick = {
                 navController.navigate(NavigationRoutes.HOME) {
+                    // Prevent another Home entry only when Home is already on top.
+                    // Switching Home -> Profile -> Home can still add a second Home.
                     launchSingleTop = true
                 }
             }
@@ -101,17 +116,21 @@ fun BottomNavigationBar(navController: NavController) {
 
 
 
-// MainScreen.kt
+// Keep the bar outside NavHost so it remains visible as destinations change.
 @Composable
 fun MainScreen() {
+    // One remembered controller connects the persistent bar to the destination host.
     val navController = rememberNavController()
 
     Scaffold(
+        // Scaffold places the bar in its bottomBar slot; it does not manage navigation.
         bottomBar = { BottomNavigationBar(navController) }
     ) { paddingValues ->
+        // Scaffold supplies content padding; applying it is the content's job.
         NavHost(
             navController = navController,
             startDestination = NavigationRoutes.HOME,
+            // Keep destination content clear of the bar and supplied insets.
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(NavigationRoutes.HOME) { HomeScreen() }
@@ -121,6 +140,7 @@ fun MainScreen() {
     }
 }
 
+// The destinations only show centered text; the persistent bar handles navigation.
 @Composable
 fun HomeScreen() {
     Box(
@@ -151,6 +171,7 @@ fun SettingsScreen() {
     }
 }
 
+// Preview helps inspect the initial layout; run the app to check navigation and Back.
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun MainScreenPreview() {
