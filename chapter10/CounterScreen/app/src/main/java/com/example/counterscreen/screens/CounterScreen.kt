@@ -11,6 +11,9 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun CounterScreen() {
+    // Remember the object, not just its number. Recomposition reuses it here.
+    // Removing this location or recreating the Activity loses this instance.
+    // CounterLogic shares this package, so it needs no import in this file.
     val counterLogic = remember { CounterLogic() }
 
     Column(modifier = Modifier
@@ -18,7 +21,9 @@ fun CounterScreen() {
         .padding(top = 50.dp)
 
     ) {
+        // Read observable state; the holder owns the number and update rule.
         Text("Count: ${counterLogic.count}")
+        // Forward a click to the holder; the UI does not assign count directly.
         Button(onClick = { counterLogic.increment() }) {
             Text("Increment")
         }

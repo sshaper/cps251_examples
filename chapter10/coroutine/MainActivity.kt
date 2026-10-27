@@ -23,7 +23,7 @@ import androidx.compose.ui.unit.dp
  * It sets up the Compose UI and manages the ViewModel for data loading.
  */
 class MainActivity : ComponentActivity() {
-    // Create a single instance of the ViewModel for the activity
+    // Retrieve the Activity-owned instance and pass it explicitly to DataScreen.
     private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -53,7 +53,7 @@ fun DataScreen(viewModel: MainViewModel) {
         Text("Data Loading Demo", style = MaterialTheme.typography.titleLarge)
         Spacer(modifier = Modifier.height(8.dp))
         
-        // Show loading indicator when data is being loaded
+        // Read observable state: show the spinner during the simulated wait.
         if (viewModel.isLoading) {
             CircularProgressIndicator()
         } else {
@@ -61,7 +61,8 @@ fun DataScreen(viewModel: MainViewModel) {
             Text(viewModel.data ?: "No data loaded yet")
         }
 
-        // Button to trigger data loading
+        // This callback calls a regular function; that function launches its own job.
+        // The button remains enabled during loading, so repeated taps can overlap.
         Button(
             onClick = { viewModel.loadData() },
             modifier = Modifier.padding(vertical = 8.dp)
@@ -79,7 +80,7 @@ fun DataScreen(viewModel: MainViewModel) {
         // Display current counter value
         Text("Counter: ${viewModel.counter}")
         
-        // Button to increment counter
+        // This still runs on Main while delay has suspended the loading coroutine.
         Button(
             onClick = { viewModel.incrementCounter() },
             modifier = Modifier.padding(vertical = 8.dp)

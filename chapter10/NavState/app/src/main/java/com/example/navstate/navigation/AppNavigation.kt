@@ -31,6 +31,8 @@ fun AppNavigation() {
     // above NavHost, so that owner is the Activity in this app. It survives rotation
     // and destination changes, but is not persistent storage or a real login session.
     // Calling viewModel() separately inside each destination would use different owners.
+    // This singular Compose API achieves the same Activity ownership as an
+    // Activity's by viewModels() property. Owner and instance establish sharing.
     val sharedViewModel: SharedViewModel = viewModel()
     
     // Define the navigation graph with all possible destinations

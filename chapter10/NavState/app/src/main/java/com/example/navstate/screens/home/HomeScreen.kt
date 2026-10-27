@@ -37,6 +37,8 @@ fun HomeScreen(
 ) {
     // This scope belongs to this composition and is cancelled when it leaves.
     // The next lesson contrasts this caller-owned work with viewModelScope.
+    // The ViewModel holds the loading flag, but this screen owns the coroutine.
+    // Retaining the ViewModel does not retain a composition-owned loading job.
     val coroutineScope = rememberCoroutineScope()
     
     // Runs when this effect enters composition, not on every recomposition.

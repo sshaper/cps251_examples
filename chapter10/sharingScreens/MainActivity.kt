@@ -2,6 +2,7 @@ package com.example.book
 
 // Android Framework imports
 import android.os.Bundle
+import androidx.core.view.WindowCompat
 
 // Activity and Compose imports
 import androidx.activity.ComponentActivity
@@ -30,13 +31,15 @@ import androidx.navigation.compose.rememberNavController
  * It sets up the Compose UI and manages the shared ViewModel for state management.
  */
 class MainActivity : ComponentActivity() {
-    // Create a single instance of the ViewModel for the entire activity
-    // This ensures state is preserved across configuration changes and shared between screens
+    // Activity's viewModels delegate retrieves an Activity-owned instance lazily.
+    // This is androidx.activity.viewModels (plural), not Compose's viewModel().
+    // Rotation retains that managed instance. Passing it to both destinations,
+    // rather than the class name alone, is what makes their counter shared.
     private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons for a light background.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
         // Set up the Compose UI with Material Design theme
@@ -44,7 +47,7 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 // Surface provides a background color and elevation
                 Surface {
-                    // Pass the ViewModel to MainScreen for state management
+                    // Pass the same object reference into the navigation setup.
                     MainScreen(viewModel)
                 }
             }
@@ -63,7 +66,8 @@ fun MainScreen(viewModel: MainViewModel) {
     // Create a NavController to handle navigation between screens
     val navController = rememberNavController()
 
-    // Set up the navigation graph with two destinations
+    // The destinations capture MainScreen's parameter and pass the same instance.
+    // Neither destination calls viewModel() to retrieve a destination-owned copy.
     NavHost(navController = navController, startDestination = "screen1") {
         // Define the first screen in the navigation graph
         composable("screen1") {
@@ -96,9 +100,9 @@ fun CounterScreen1(
     ) {
         // Display screen title
         Text("Screen 1")
-        // Display the current count from the ViewModel
+        // Read the shared observable count; a new screen reads the latest value.
         Text("Count: ${viewModel.count}")
-        // Button to increment the counter
+        // Request a change to the one shared count, rather than keep a screen copy.
         Button(onClick = { viewModel.increment() }) {
             Text("Increment")
         }
@@ -130,13 +134,15 @@ fun CounterScreen2(
     ) {
         // Display screen title
         Text("Screen 2")
-        // Display the current count from the ViewModel
+        // Read the shared observable count; a new screen reads the latest value.
         Text("Count: ${viewModel.count}")
-        // Button to increment the counter
+        // Request a change to the one shared count, rather than keep a screen copy.
         Button(onClick = { viewModel.increment() }) {
             Text("Increment")
         }
-        // Button to navigate back to Screen 1
+        // Navigate forward to another screen1 entry; this is not popBackStack().
+        // Repeated navigation buttons grow history. System Back pops an entry.
+        // The Activity-owned count is independent of these destination entries.
         Button(onClick = { navController.navigate("screen1") }) {
             Text("Go to Screen 1")
         }

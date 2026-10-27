@@ -18,12 +18,14 @@ import com.example.counterviewmodel.ui.theme.CounterViewModelTheme
 
 
 
+// This Activity starts the UI. File/package organization does not determine
+// state lifetime; the screen's remember or viewModel retrieval does that.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            // Call your composable screen and pass the ViewModel
+            // Show the screen; its default parameter retrieves the managed ViewModel.
             CounterScreen()
 
         }

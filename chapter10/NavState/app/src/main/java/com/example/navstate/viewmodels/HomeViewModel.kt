@@ -43,6 +43,9 @@ class HomeViewModel : ViewModel() {
      * Simulates loading data for the Home screen
      * In a real app, this would make network calls or database queries
      */
+    // suspend permits suspension; it does not launch a coroutine or choose a thread.
+    // Cancellation at delay skips the assignment below, so isLoading can remain
+    // true until a later successful call. This sample retains that behavior.
     suspend fun loadHomeData() {
         isLoading = true
         // Simulate network delay

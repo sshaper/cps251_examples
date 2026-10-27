@@ -5,6 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 // Compose UI imports
 import androidx.compose.foundation.layout.Column
@@ -34,14 +35,14 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons for a light background.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
         // Set up the Compose UI with Material Design theme
         setContent {
             MaterialTheme {
                 Surface {
-                    CounterParent()  // Main content of the app
+                    CounterParentWithViewModel()  // Main content of the app
                 }
             }
         }
@@ -49,25 +50,22 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * CounterParent is the main composable that manages the counter state.
- * It follows the state hoisting pattern where:
- * 1. State is managed at the parent level
- * 2. State is passed down to child composables
- * 3. Events are passed up through callbacks
- *
- * The composable uses:
- * - remember and mutableStateOf for state management
- * - Column for vertical layout
- * - Modifier.padding for proper spacing
+ * Connects the Activity-owned ViewModel to children that accept values/callbacks.
+ * The count is owned outside this composable; the layout and child API are the
+ * same as in hoisting.kt. Do not install both alternative Activities together.
  */
 @Composable
 fun CounterParentWithViewModel() {
+    // Retrieve the existing instance for this Activity, creating it if needed.
+    // No NavHost supplies a destination owner in this standalone example.
     val viewModel: CounterViewModel = viewModel()
     Column(
         modifier = Modifier
             .padding(top = 50.dp)
             .padding(16.dp)
     ) {
+        // Reading count reaches observable _count.value in the ViewModel.
+        // The child receives an Int, rather than the entire ViewModel.
         CounterDisplay(count = viewModel.count)
         CounterIncButton(onIncrement = { viewModel.increment() })
         CounterDecButton(onDeIncrement = { viewModel.decrement() })
@@ -87,7 +85,7 @@ fun CounterDisplay(count: Int) {
 /**
  * CounterIncButton is a stateless composable that provides the increment functionality.
  * It receives a callback function (onIncrement) as a parameter.
- * When clicked, it triggers the callback to update the parent's state.
+ * The caller supplies the update operation; this child does not know its state owner.
  */
 @Composable
 fun CounterIncButton(onIncrement: () -> Unit) {
@@ -98,9 +96,9 @@ fun CounterIncButton(onIncrement: () -> Unit) {
 }
 
 /**
- * CounterDecButton is a stateless composable that provides the increment functionality.
+ * CounterDecButton requests a decrement without owning a separate count.
  * It receives a callback function (onDeIncrement) as a parameter.
- * When clicked, it triggers the callback to update the parent's state.
+ * The caller supplies the update operation; this child does not know its state owner.
  */
 @Composable
 fun CounterDecButton(onDeIncrement: () -> Unit){
@@ -110,7 +108,7 @@ fun CounterDecButton(onDeIncrement: () -> Unit){
 }
 
 /**
- * Preview function for the CounterParent composable.
+ * Preview of the ViewModel-backed screen; this does not test rotation retention.
  * This allows us to see how the UI looks in Android Studio's preview pane
  * without having to run the app.
  */
@@ -118,6 +116,6 @@ fun CounterDecButton(onDeIncrement: () -> Unit){
 @Composable
 fun CounterParentPreview() {
     MaterialTheme {
-        CounterParent()
+        CounterParentWithViewModel()
     }
 }

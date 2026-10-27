@@ -39,6 +39,8 @@ class SharedViewModel : ViewModel() {
     /**
      * Clears the current user (for logout functionality)
      */
+    // Clear only the shared sample user. ProfileData and existing route arguments
+    // have separate owners and are not rewritten by this operation.
     fun clearUser() {
         currentUser = null
     }

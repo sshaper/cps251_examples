@@ -35,6 +35,8 @@ class ProfileViewModel : ViewModel() {
      * In a real app, this would make a network call to fetch profile information
      * @param userId The ID of the user whose profile to load
      */
+    // This regular function finishes immediately; an effect calling it does not
+    // turn its synchronous sample-data construction into background I/O.
     fun loadProfile(userId: String) {
         isLoading = true
         

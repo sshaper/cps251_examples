@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons for a light background.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
         // Set up the Compose UI with Material Design theme
@@ -62,8 +62,9 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun CounterParent() {
-    // State management using remember and mutableStateOf
-    // This ensures the state persists across recompositions
+    // This is the only count shared by the display and both buttons.
+    // remember retains it across recompositions, not Activity recreation on rotation.
+    // by delegates reads/writes to the observable state's value.
     var count by remember { mutableStateOf(0) }
 
     // Column layout with padding for proper spacing
@@ -72,7 +73,9 @@ fun CounterParent() {
             .padding(top = 50.dp)  // Space from top of screen
             .padding(16.dp)        // Padding around all sides
     ) {
-        // Child composables receive state and callbacks as parameters
+        // Pass the current value down and describe how each event changes it.
+        // The lambdas capture this count; their bodies run when buttons are clicked.
+        // A new display would receive count rather than own a synchronized copy.
         CounterDisplay(count = count)
         CounterIncButton(onIncrement = { count++ })
         CounterDecButton(onDeIncrement = { count --})
@@ -92,9 +95,11 @@ fun CounterDisplay(count: Int) {
 /**
  * CounterIncButton is a stateless composable that provides the increment functionality.
  * It receives a callback function (onIncrement) as a parameter.
- * When clicked, it triggers the callback to update the parent's state.
+ * The caller supplies the update operation; this child does not know its state owner.
  */
 @Composable
+// () -> Unit means a function taking no arguments and returning no useful value.
+// Passing onIncrement to onClick supplies the function without calling it now.
 fun CounterIncButton(onIncrement: () -> Unit) {
     Button(onClick = onIncrement) {
         Text("Increment")
@@ -103,9 +108,9 @@ fun CounterIncButton(onIncrement: () -> Unit) {
 }
 
 /**
- * CounterDecButton is a stateless composable that provides the increment functionality.
+ * CounterDecButton requests a decrement without owning a separate count.
  * It receives a callback function (onDeIncrement) as a parameter.
- * When clicked, it triggers the callback to update the parent's state.
+ * The caller supplies the update operation; this child does not know its state owner.
  */
 @Composable
 fun CounterDecButton(onDeIncrement: () -> Unit){
