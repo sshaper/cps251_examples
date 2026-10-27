@@ -36,7 +36,7 @@ import androidx.navigation.navArgument
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons
+        // Use a light status bar appearance (dark icons on a light background)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with navigation
@@ -52,6 +52,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun NavigationWithMultipleArgs() {
+    // Own navigation here; screens report selected values through callbacks.
     val navController = rememberNavController()
     
     NavHost(
@@ -61,23 +62,31 @@ fun NavigationWithMultipleArgs() {
         composable("home") {
             HomeScreen(
                 onNavigateToProduct = { id, name -> 
+                    // Match product/{id}/{name}: ID first, then name.
+                    // These fixed sample names contain no route delimiters. Arbitrary
+                    // text needs Uri.encode(name) before insertion into the route.
                     navController.navigate("product/$id/$name") 
                 }
             )
         }
         composable(
+            // Each placeholder has a matching key and parsing type below.
             "product/{id}/{name}",
             arguments = listOf(
                 navArgument("id") { type = NavType.IntType },
                 navArgument("name") { type = NavType.StringType }
             )
         ) { backStackEntry ->
+            // Read values belonging to this particular product destination entry.
+            // Safe calls allow a null Bundle; getInt returns 0 for a missing key in
+            // an existing Bundle, so this is not general validation of product IDs.
             val id = backStackEntry.arguments?.getInt("id")
             val name = backStackEntry.arguments?.getString("name")
             ProductScreen(
                 id = id,
                 name = name,
                 onNavigateBack = {
+                    // Remove details and return to the existing product-list entry.
                     navController.popBackStack()
                 }
             )
@@ -157,7 +166,8 @@ fun ProductScreen(
             modifier = Modifier.padding(bottom = 8.dp)
         )
         
-        // Show product information if available
+        // Guard nullable parameters before display. Normal navigation supplies both
+        // required values; this check does not validate whether an ID exists in a data source.
         if (id != null && name != null) {
             Text("Product ID: $id")
             Text("Product Name: $name")

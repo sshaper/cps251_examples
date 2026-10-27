@@ -37,6 +37,8 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.navdemo.ui.theme.NavDemoTheme
 
+// Chapter 9: send a name from Home to Profile using a required route argument.
+// Use this standalone example in a project with Navigation Compose configured.
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,6 +46,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             MaterialTheme{
                 Surface {
+                    // Keep navigation wiring above the screens that report user events.
                     AppNav()
                 }
             }
@@ -54,11 +57,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun AppNav(){
+    // Reuse the controller across recompositions; Home is the initial destination.
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "home"){
         composable("home") {
+            // Home supplies a String to this callback; it is the entered name.
             HomeScreen(onNavigateToProfile = {
+                // For Alex, build profile/Alex to match profile/{userName}.
+                // This teaching version inserts raw text. Unrestricted values need
+                // Uri.encode(value) before insertion because /, ?, and # affect routes.
                 navController.navigate("profile/$it") {
+                    // Only prevent another copy when this destination is already on top.
                     launchSingleTop = true
 
                 }
@@ -66,16 +75,21 @@ fun AppNav(){
             })
         }
         composable(
+            // The placeholder and argument key below must use the same spelling.
             route = "profile/{userName}",
             arguments = listOf(
+                // Required text argument: no default or nullable option is declared.
                 navArgument("userName") { type = NavType.StringType }
             )
         ) { backStackEntry ->
 
+            // This entry holds the parsed arguments for this visit to Profile.
+            // Bundle/getString access is nullable even though the route requires a name.
             val username = backStackEntry.arguments?.getString("userName")
 
             ProfileScreen(
                 userName = username,
+                // Reveal the existing Home entry rather than navigating to a new Home.
                 onBack = { navController.popBackStack() }
             )
         }
@@ -84,6 +98,8 @@ fun AppNav(){
 
 @Composable
 fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
+    // Local input state drives the field and button. It is not shared profile state
+    // and remember alone does not promise restoration after Activity recreation.
     var name by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
@@ -91,12 +107,15 @@ fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
             .systemBarsPadding(),
         horizontalAlignment = Alignment.Start
     ) {
+        // Each edit changes state, allowing Compose to update the field and enabled state.
         OutlinedTextField(
             value = name,
             onValueChange = {name = it},
             label = { Text("Your Name") }
         )
 
+        // Send the current text only when tapped. isNotBlank rejects empty/whitespace
+        // input; it does not trim text or escape route characters.
         Button(onClick = { onNavigateToProfile(name) },enabled = name.isNotBlank()) {
 
             Text("Go to Profile")
@@ -110,6 +129,8 @@ fun HomeScreen(onNavigateToProfile: (String) -> Unit) {
 }
 
 @Composable
+// The screen receives a value, not a controller or a live link to Home's text state.
+// Normal navigation supplies a name; a null passed directly here would display "null".
 fun ProfileScreen(userName: String?, onBack: () -> Unit) {
     Column(
         modifier = Modifier
