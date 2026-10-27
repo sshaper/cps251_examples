@@ -5,7 +5,7 @@ package com.example.navstate.navigation
  * Using constants prevents typos and makes route names reusable
  * 
  * Benefits of this approach:
- * - Type safety: Compiler catches typos
+ * - Reuse: constants reduce inconsistent spelling; route strings are not fully type safe
  * - Refactoring: Easy to change route names in one place
  * - Documentation: Clear overview of all available routes
  */
@@ -22,6 +22,8 @@ object NavRoutes {
      * The {userId} part is a navigation argument that gets replaced with actual values
      * Example: "profile/123" or "profile/john_doe"
      */
+    // Despite the key name userId, this sample sends a display name such as
+    // Scott Shaper or John Doe. Keep the key consistent with argument extraction.
     const val PROFILE = "profile/{userId}"
     
     /**

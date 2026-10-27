@@ -25,18 +25,22 @@ import kotlinx.coroutines.launch
  */
 @Composable
 fun HomeScreen(
-    // Screen-specific ViewModel - manages state only for this screen
+    // This default resolves under the Home navigation entry, not the Activity.
+    // Another Home entry can have another HomeViewModel.
     homeViewModel: HomeViewModel = viewModel(),
-    // Shared ViewModel - manages state that can be accessed by other screens
+    // AppNavigation explicitly supplies the Activity-owned shared instance.
+    // This default alone would NOT guarantee sharing with other destinations.
     sharedViewModel: SharedViewModel = viewModel(),
     // Navigation callbacks - functions to navigate to other screens
     onProfileClick: (String) -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    // Get coroutine scope for handling suspend functions
+    // This scope belongs to this composition and is cancelled when it leaves.
+    // The next lesson contrasts this caller-owned work with viewModelScope.
     val coroutineScope = rememberCoroutineScope()
     
-    // Load home data when the screen is first displayed
+    // Runs when this effect enters composition, not on every recomposition.
+    // It can run again on re-entry; Unit is not a permanent once-per-app flag.
     LaunchedEffect(Unit) {
         homeViewModel.loadHomeData()
     }
@@ -83,6 +87,7 @@ fun HomeScreen(
             onClick = { 
                 // Pass a sample user name when navigating to profile
                 //onProfileClick("SampleUser")
+                // This fixed argument does not read or update the shared logged-in user.
                 onProfileClick("Scott Shaper")
             },
             modifier = Modifier.fillMaxWidth()

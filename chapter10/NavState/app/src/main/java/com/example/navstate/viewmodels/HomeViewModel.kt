@@ -46,6 +46,8 @@ class HomeViewModel : ViewModel() {
     suspend fun loadHomeData() {
         isLoading = true
         // Simulate network delay
+        // delay suspends the caller's coroutine; it does not block a thread or
+        // perform a real network request. The caller controls this job's lifetime.
         delay(2000) // 2 second delay to simulate loading
         isLoading = false
     }

@@ -31,8 +31,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // Configure the window to use light status bar icons
-        // This ensures better visibility of status bar icons on light backgrounds
+        // Request dark status-bar icons for a light status-bar background.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -61,8 +60,10 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun CounterScreen() {
-    // Get or create a ViewModel instance
-    // viewModel() is a composable function that handles ViewModel lifecycle
+    // Retrieve the MainViewModel for the current owner, creating it if needed.
+    // There is no NavHost here, so the owner is this Activity. Recomposition
+    // retrieves the same instance, and Android retains it across rotation.
+    // Calling MainViewModel() directly would bypass that managed lifetime.
     val viewModel: MainViewModel = viewModel()
     
     // Column arranges its children vertically
@@ -77,7 +78,8 @@ fun CounterScreen() {
         }
         
         // Text composable that displays the current count
-        // It automatically updates when the count changes in ViewModel
+        // Reading count reaches _count.value, so Compose observes the state read.
+        // increment() changes that state and schedules the observing UI to update.
         Text("Count: ${viewModel.count}")
     }
 }
@@ -85,7 +87,7 @@ fun CounterScreen() {
 /**
  * Preview function for the CounterScreen
  * This allows us to see how the screen looks in Android Studio's preview pane
- * without having to run the app
+ * without having to run the app. A preview is not a rotation-retention test
  */
 @Preview(showBackground = true, showSystemUi = true)
 @Composable

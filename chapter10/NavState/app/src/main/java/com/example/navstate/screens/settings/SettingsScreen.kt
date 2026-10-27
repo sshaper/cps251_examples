@@ -21,7 +21,8 @@ import com.example.navstate.viewmodels.SharedViewModel
  */
 @Composable
 fun SettingsScreen(
-    // Shared ViewModel for app-wide state
+    // Required parameter: use the instance AppNavigation passes; do not create
+    // a destination-owned replacement here, which would stop the sharing.
     sharedViewModel: SharedViewModel,
     // Navigation callbacks
     onHomeClick: () -> Unit,
@@ -94,7 +95,8 @@ fun SettingsScreen(
         // Button to simulate user login
         Button(
             onClick = {
-                // Create a sample user and update the shared state
+                // Local demonstration only: no authentication request or disk save.
+                // Other screens observing this same instance can display the change.
                 val sampleUser = User(
                     id = "1",
                     name = "John Doe",
@@ -140,6 +142,8 @@ fun SettingsScreen(
         
         Button(
             //onClick = { onProfileClick("SampleUser") },
+            // Copy the current name into a navigation argument at click time.
+            // Later shared-user changes do not rewrite that existing route value.
             onClick = { onProfileClick(sharedViewModel.currentUser?.name ?: "Unknown") },
             modifier = Modifier.fillMaxWidth()
         ) {

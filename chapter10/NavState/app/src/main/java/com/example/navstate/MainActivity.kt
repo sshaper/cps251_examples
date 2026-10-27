@@ -36,6 +36,8 @@ class MainActivity : ComponentActivity() {
                 ) {
                     // AppNavigation is the root composable that manages all navigation
                     // This is where the navigation graph is set up and all screens are defined
+                    // AppNavigation is called at the Activity level, before any NavHost
+                    // destination supplies its own ViewModel owner. This matters to sharing.
                     AppNavigation()
                 }
             }

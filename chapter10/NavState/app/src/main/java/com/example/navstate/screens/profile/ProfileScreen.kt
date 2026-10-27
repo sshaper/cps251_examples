@@ -23,18 +23,21 @@ import com.example.navstate.viewmodels.SharedViewModel
  */
 @Composable
 fun ProfileScreen(
-    // User name passed from HomeScreen
+    // Route value supplied by AppNavigation from either Home or Settings.
     userName: String,
-    // Screen-specific ViewModel for profile data
+    // Default owner is this Profile destination entry.
     profileViewModel: ProfileViewModel = viewModel(),
-    // Shared ViewModel for app-wide state
+    // AppNavigation supplies the same Activity-owned instance used by other screens.
+    // The default viewModel() call would otherwise use this destination owner.
     sharedViewModel: SharedViewModel = viewModel(),
     // Navigation callbacks
     onHomeClick: () -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    // Load profile data when the screen is first displayed
-    // In a real app, you would get the userId from navigation arguments
+    // Load this entry's route value when the effect enters composition.
+    // Unit does not restart solely because userName changes in an existing
+    // composition. Re-entering the composition can run this initializer again.
+    // In this app a new route normally creates a new destination entry.
     LaunchedEffect(Unit) {
         profileViewModel.loadProfile(userName)
     }
@@ -137,6 +140,8 @@ fun ProfileScreen(
         // Button to reload profile data
         OutlinedButton(
             onClick = { 
+                // Replace only this entry's ProfileData. The route argument and
+                // SharedViewModel.currentUser stay unchanged.
                 profileViewModel.loadProfile("ReloadedUser") 
             },
             modifier = Modifier.fillMaxWidth()

@@ -27,8 +27,10 @@ fun AppNavigation() {
     // Create the navigation controller that manages navigation state
     val navController = rememberNavController()
     
-    // Create a shared ViewModel that will be available to all screens
-    // This ViewModel persists across navigation and survives configuration changes
+    // Obtain one instance from the current owner. MainActivity calls this function
+    // above NavHost, so that owner is the Activity in this app. It survives rotation
+    // and destination changes, but is not persistent storage or a real login session.
+    // Calling viewModel() separately inside each destination would use different owners.
     val sharedViewModel: SharedViewModel = viewModel()
     
     // Define the navigation graph with all possible destinations
@@ -44,7 +46,10 @@ fun AppNavigation() {
                 sharedViewModel = sharedViewModel,
                 // Navigation callbacks that Home screen can use to navigate to other screens
                 onProfileClick = { userName ->
-                    // Navigate to profile screen with the provided user name
+                    // The callback carries a value; the screen does not own the controller.
+                    // The raw route text matches profile/{userId}. Arbitrary input with
+                    // route delimiters would need Uri.encode(userName) before insertion.
+                    // This sample passes a display name, despite the userId argument key.
                     navController.navigate("profile/$userName")
                 },
                 onSettingsClick = {
@@ -65,16 +70,20 @@ fun AppNavigation() {
             )
         ) { backStackEntry ->
             // Extract the userId from the navigation arguments
-            // If userId is not provided, default to "Unknown"
+            // The route requires this argument. The fallback handles a null Bundle/read;
+            // it does not make the path argument optional.
             val userId = backStackEntry.arguments?.getString("userId") ?: "Unknown"
             
             ProfileScreen(
-                // Pass the user name from the HomeScreen
+                // The value may come from Home or Settings. It is a snapshot for this
+                // navigation entry, independent of the live shared currentUser.
                 userName = userId,
-                // Pass the shared ViewModel
+                // Pass the SAME Activity-owned instance, overriding the screen default.
                 sharedViewModel = sharedViewModel,
                 // Navigation callbacks for Profile screen
                 onHomeClick = { 
+                    // This is forward navigation, not popBackStack: it can add a new
+                    // Home entry and a new destination-owned HomeViewModel.
                     navController.navigate(NavRoutes.HOME) 
                 },
                 onSettingsClick = { 
@@ -86,10 +95,12 @@ fun AppNavigation() {
         // Define the Settings screen destination
         composable(NavRoutes.SETTINGS) {
             SettingsScreen(
-                // Pass the shared ViewModel
+                // Pass the SAME Activity-owned instance, overriding the screen default.
                 sharedViewModel = sharedViewModel,
                 // Navigation callbacks for Settings screen
                 onHomeClick = { 
+                    // This is forward navigation, not popBackStack: it can add a new
+                    // Home entry and a new destination-owned HomeViewModel.
                     navController.navigate(NavRoutes.HOME) 
                 },
                 onProfileClick = { userName -> 

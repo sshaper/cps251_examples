@@ -8,7 +8,7 @@ import com.example.navstate.data.User
 
 /**
  * SharedViewModel manages state that needs to be accessed by multiple screens
- * This ViewModel is shared across the entire navigation graph
+ * AppNavigation obtains this instance from its Activity owner and passes it explicitly
  * 
  * Key responsibilities:
  * - Store user session information
@@ -22,6 +22,8 @@ class SharedViewModel : ViewModel() {
      * This state is shared between Home, Profile, and Settings screens
      * Using mutableStateOf ensures the UI updates automatically when this changes
      */
+    // Readers observe Compose state. private set keeps writes behind updateUser/clearUser.
+    // In-memory only: a new app process starts with null, not a remembered login.
     var currentUser by mutableStateOf<User?>(null)
         private set  // Only this ViewModel can modify the user
     

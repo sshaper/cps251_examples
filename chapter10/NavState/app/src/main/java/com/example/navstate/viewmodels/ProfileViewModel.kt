@@ -38,8 +38,8 @@ class ProfileViewModel : ViewModel() {
     fun loadProfile(userId: String) {
         isLoading = true
         
-        // Simulate loading profile data from a network call
-        // In a real app, you would use coroutines and make actual API calls
+        // Construct sample data synchronously: there is no network request or delay.
+        // isLoading changes true -> false in one call, so a spinner may never render.
         profileData = ProfileData(
             userId = userId,
             description = "Profile for $userId - This is a sample profile description that demonstrates how profile data is managed in the ViewModel."
@@ -50,7 +50,7 @@ class ProfileViewModel : ViewModel() {
     
     /**
      * Clears the current profile data
-     * Useful when navigating away from the profile or when user logs out
+     * Available for an explicit reset; current navigation/logout callbacks do not call it.
      */
     fun clearProfile() {
         profileData = null
