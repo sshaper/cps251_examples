@@ -63,7 +63,9 @@ fun AppNav(){
         composable("home") {
             // Home supplies a String to this callback; it is the entered name.
             HomeScreen(onNavigateToProfile = {
+                // $it is a Kotlin string template: insert the callback's name into the text.
                 // For Alex, build profile/Alex to match profile/{userName}.
+                // Kotlin builds the string; Navigation matches and parses it at runtime.
                 // This teaching version inserts raw text. Unrestricted values need
                 // Uri.encode(value) before insertion because /, ?, and # affect routes.
                 navController.navigate("profile/$it") {
