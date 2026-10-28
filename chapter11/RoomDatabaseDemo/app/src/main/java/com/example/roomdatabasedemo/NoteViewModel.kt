@@ -15,7 +15,8 @@ import kotlinx.coroutines.launch
 // It exposes data to the UI and handles UI-related data operations, abstracting the data source.
 class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
     // Expose a StateFlow of notes from the repository. This allows the UI to observe changes.
-    // stateIn converts a Flow into a StateFlow, ensuring it's always active while subscribed.
+    // Share the Room query and retain its latest list for UI subscribers.
+    // WhileSubscribed stops upstream collection five seconds after the last subscriber leaves.
     val notes: StateFlow<List<Note>> = repository.allNotes.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(5000), // Start collecting when there's an active subscriber and stop 5s after the last subscriber disappears.
@@ -23,15 +24,23 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
     )
 
     // Function to add a new note. It launches a coroutine in the viewModelScope
-    // to perform the insert operation asynchronously via the repository.
+    // to call the repository's suspending insert. Room handles database execution.
+    // launch itself does not move arbitrary work to a background thread.
     fun addNote(title: String, content: String, date: String) {
         viewModelScope.launch {
             repository.insert(Note(title = title, content = content, date = date))
         }
     }
 
+    // Save changed values to the existing row; the caller preserves the original ID.
+    fun updateNote(note: Note) {
+        viewModelScope.launch {
+            repository.update(note)
+        }
+    }
+
     // Function to delete an existing note. It launches a coroutine in the viewModelScope
-    // to perform the delete operation asynchronously via the repository.
+    // to call the repository's suspending delete; the UI observes the resulting query update.
     fun deleteNote(note: Note) {
         viewModelScope.launch {
             repository.delete(note)
@@ -52,7 +61,7 @@ class NoteViewModel(private val repository: NoteRepository) : ViewModel() {
 // NoteViewModelFactory is a custom ViewModelProvider.Factory that allows us to instantiate
 // NoteViewModel with a NoteRepository dependency.
 class NoteViewModelFactory(private val repository: NoteRepository) : ViewModelProvider.Factory {
-    // The create method is responsible for creating new ViewModel instances.
+    // The provider calls create when the owner needs a new instance, not on every recomposition.
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         // Check if the requested ViewModel class is NoteViewModel.
         if (modelClass.isAssignableFrom(NoteViewModel::class.java)) {

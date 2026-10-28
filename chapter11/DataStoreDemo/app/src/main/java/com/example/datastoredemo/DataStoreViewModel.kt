@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 // Key Concepts:
 // - `viewModelScope`: A CoroutineScope tied to the ViewModel's lifecycle. Any coroutines launched
 //   within this scope will be automatically cancelled when the ViewModel is cleared (e.g., when the
-//   associated UI is destroyed). This prevents memory leaks and ensures background tasks don't run
+//   Activity is finished, not merely rotated). This ensures scoped tasks do not run
 //   unnecessarily.
 // - `.launch`: A coroutine builder function used to start a new coroutine. It's used for "fire-and-forget"
 //   tasks where you don't need to await a direct result immediately. It returns a `Job` object
@@ -29,8 +29,9 @@ class DataStoreViewModel(application: Application) : AndroidViewModel(applicatio
     
     // Exposes the user's name preference as a StateFlow.
     // `stateIn` converts the Flow from PreferencesManager into a StateFlow,
-    // making it lifecycle-aware and optimized for UI observation.
-    // `SharingStarted.Lazily` means the flow starts collecting only when there's an active collector.
+    // sharing collection and exposing a current value. UI lifecycle collection is separate.
+    // Lazily starts upstream collection on the first subscriber and keeps it running
+    // until viewModelScope is cancelled, even if subscribers subsequently disappear.
     // "Guest" is the initial value until the actual user name is loaded.
     val userName: StateFlow<String> = preferencesManager.userName.stateIn(
         viewModelScope,

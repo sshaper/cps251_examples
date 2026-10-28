@@ -26,7 +26,7 @@ object PreferencesKeys {
 
 // Extension property on Context to create a singleton DataStore instance.
 // The `preferencesDataStore` delegate creates and manages the DataStore.
-// "simple_preferences" is the name of the file where preferences will be stored.
+// The runtime file is simple_preferences.preferences_pb in app-private files/datastore.
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "simple_preferences")
 
 // Manages reading and writing user preferences using DataStore.
@@ -60,8 +60,8 @@ class PreferencesManager(private val context: Context) {
 
     // --- Update functions ---
 
-    // Suspends function to update the user's name in DataStore.
-    // The `edit` block provides a transactional way to modify preferences.
+    // Suspending write: DataStore handles storage work without blocking the UI thread.
+    // The edit block commits its key changes together; suspend alone is not a thread switch.
     suspend fun updateUserName(name: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.USER_NAME] = name

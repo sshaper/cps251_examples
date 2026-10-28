@@ -22,18 +22,18 @@ class MainActivity : ComponentActivity() {
     // onCreate is called when the activity is first created.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for a modern look.
+        // A light status-bar appearance requests dark icons for the light background.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
         // Initialize the ViewModel using by viewModels.
-        // The provideFactory method ensures the ViewModel has access to the application context.
+        // The factory constructs the repository dependency using the application context.
         val viewModel: NoteViewModel by viewModels {
             NoteViewModel.provideFactory(application)
         }
 
         // Set up the Compose UI content for this activity.
         setContent {
-            // Apply the custom theme for the application.
+            // Provide Material styling directly; the generated custom theme is not used here.
             MaterialTheme {
                 // Surface is a fundamental composable that applies background color and fills the screen.
                 Surface(

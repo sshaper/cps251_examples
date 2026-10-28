@@ -16,15 +16,16 @@ abstract class NoteDatabase : RoomDatabase() {
     // Companion object allows us to define static-like members and methods for the database.
     companion object {
         // The @Volatile annotation ensures that changes to the INSTANCE variable are immediately
-        // visible to all threads. This is crucial for thread-safe singleton implementation.
+        // visible to all threads. This does not by itself make database creation atomic.
         @Volatile
         private var INSTANCE: NoteDatabase? = null
 
-        // Provides a singleton instance of the NoteDatabase.
-        // If INSTANCE is null, it creates the database in a synchronized block to prevent multiple instances.
+        // Reuses the database reference for this app's Activity/factory creation path.
+        // The block serializes creation but has no second INSTANCE check inside it.
+        // This is not double-checked locking for concurrent first-time callers.
         fun getDatabase(context: Context): NoteDatabase {
             return INSTANCE ?: synchronized(this) {
-                // Create database here if INSTANCE is null.
+                // The outer check found no instance; build and cache the database object.
                 val instance = Room.databaseBuilder(
                     context.applicationContext, // Application context to prevent memory leaks.
                     NoteDatabase::class.java,

@@ -9,10 +9,13 @@ class NoteRepository(private val noteDao: NoteDao) {
     val allNotes: Flow<List<Note>> = noteDao.getAllNotes()
 
     // Suspended function to insert a new note into the database.
-    // Marked as suspend because Room operations are asynchronous.
+    // Remains suspend because the delegated DAO operation is suspending.
     suspend fun insert(note: Note) = noteDao.insert(note)
 
+    // Forward an edited note with its original ID to Room's update operation.
+    suspend fun update(note: Note) = noteDao.update(note)
+
     // Suspended function to delete an existing note from the database.
-    // Marked as suspend because Room operations are asynchronous.
+    // Remains suspend because the delegated DAO operation is suspending.
     suspend fun delete(note: Note) = noteDao.delete(note)
 } 

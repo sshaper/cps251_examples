@@ -39,7 +39,7 @@ fun DataStoreScreen(
     // The UI recomposes automatically whenever notifications changes.
     val notifications by viewModel.notifications.collectAsState()
     
-    // Local state for the new user name input field.
+    // Unsaved form input is local remembered state, separate from the persisted userName.
     var newUserName by remember { mutableStateOf("") }
     
     // LazyColumn is used for efficient rendering of a scrollable list of settings.
@@ -216,7 +216,7 @@ fun DataStoreScreen(
                     
                     Spacer(modifier = Modifier.height(16.dp))
                     
-                    // Notifications toggle switch.
+                    // Saves a preference only; this example does not send system notifications.
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,

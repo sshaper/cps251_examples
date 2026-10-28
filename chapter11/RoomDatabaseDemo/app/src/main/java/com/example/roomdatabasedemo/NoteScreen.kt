@@ -10,7 +10,7 @@ import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
 
-// Opt-in to use experimental Material 3 API features, like the new Scaffold.
+// Opt in to experimental Material 3 APIs used by this example.
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NoteScreen(viewModel: NoteViewModel) {
@@ -20,7 +20,7 @@ fun NoteScreen(viewModel: NoteViewModel) {
     var title by remember { mutableStateOf("") }
     // State for the content input field.
     var content by remember { mutableStateOf("") }
-    // State to hold the note currently being edited, if any.
+    // Original saved note being edited; typing changes only local title/content values.
     var editingNote by remember { mutableStateOf<Note?>(null) }
     // State to control the visibility of the delete confirmation dialog.
     var showDeleteDialog by remember { mutableStateOf<Note?>(null) }
@@ -35,7 +35,8 @@ fun NoteScreen(viewModel: NoteViewModel) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
-        // Main column for arranging input fields, buttons, and the note list.
+        // Preserve the fixed 50.dp top offset used to position the form below the phone top.
+        // This layout does not apply the Scaffold padding parameter.
         Column(modifier = Modifier
             .padding(16.dp)
             .padding(top = 50.dp)) {
@@ -68,9 +69,13 @@ fun NoteScreen(viewModel: NoteViewModel) {
                             viewModel.addNote(title, content, dateFormat.format(Date()))
                             scope.launch { snackbarHostState.showSnackbar("Note added!") }
                         } else {
-                            // If editing,
-                            viewModel.deleteNote(editingNote!!)
-                            viewModel.addNote(title, content, dateFormat.format(Date()))
+                            // copy changes the edited values while preserving the saved note's ID.
+                            // The date records the most recent save, as it does when adding a note.
+                            viewModel.updateNote(editingNote!!.copy(
+                                title = title,
+                                content = content,
+                                date = dateFormat.format(Date())
+                            ))
                             editingNote = null
                             scope.launch { snackbarHostState.showSnackbar("Note updated!") }
                         }
@@ -152,16 +157,17 @@ fun NoteScreen(viewModel: NoteViewModel) {
                 text = { Text("Are you sure you want to delete this note?") },
                 confirmButton = {
                     TextButton(onClick = {
-                        // Delete the note, show snackbar, and reset states.
+                        // Request deletion; the snackbar is not an awaited database-success result.
                         viewModel.deleteNote(showDeleteDialog!!)
                         scope.launch { snackbarHostState.showSnackbar("Note deleted!") }
-                        showDeleteDialog = null
                         // If the deleted note was being edited, clear editing state.
                         if (editingNote == showDeleteDialog) {
                             editingNote = null
                             title = ""
                             content = ""
                         }
+                        // Keep the deletion target until the editing comparison is complete.
+                        showDeleteDialog = null
                     }) {
                         Text("Delete")
                     }
