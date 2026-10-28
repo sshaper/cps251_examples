@@ -104,6 +104,8 @@ fun SectionedSettingsList() {
     // It only renders items that are currently visible on screen
     LazyColumn {
         // Iterate through each settings section
+        // Register each header, its rows, and a divider in the lazy content; these headers scroll normally.
+        // Register each header, its rows, and a divider in the lazy content; these headers scroll normally.
         settings.forEach { section ->
             // Add section title as a header item
             item {

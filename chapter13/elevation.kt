@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -48,7 +48,7 @@ class MainActivity : ComponentActivity() {
 
 /**
  * ElevationExample demonstrates different elevation levels in Material Design 3.
- * This composable shows three different components with varying elevation levels:
+ * This composable shows four component examples with varying elevation levels:
  * 1. A low-elevation Surface (2dp)
  * 2. A medium-elevation Card (8dp)
  * 3. A high-elevation Surface (12dp)
@@ -66,7 +66,8 @@ fun ElevationExample() {
             .padding(top = 50.dp)
     ) {
         // Low elevation surface (2dp) - subtle elevation for basic content
-        Surface(
+        // Tonal elevation affects themed surface color; shadow elevation requests a shadow.
+    Surface(
             tonalElevation = 2.dp,
             shadowElevation = 2.dp,
             modifier = Modifier.padding(bottom = 8.dp)
@@ -77,7 +78,7 @@ fun ElevationExample() {
         // Spacer creates consistent 25dp vertical spacing between components
         Spacer(modifier = Modifier.height(25.dp))
         
-        // Medium elevation card (8dp) - standard elevation for interactive content
+        // Card with an explicit 8dp elevation for this comparison
         Card(
             elevation = CardDefaults.cardElevation(8.dp),
             modifier = Modifier.padding(bottom = 8.dp)

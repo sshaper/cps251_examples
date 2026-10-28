@@ -152,6 +152,8 @@ fun LoadingSpinner(
  * @param singleLine Whether the text field is single line.
  */
 @Composable
+// The caller owns text and validation; this component only reports edits and displays feedback.
+// The caller owns text and validation; this component only reports edits and displays feedback.
 fun CustomTextField(
     value: String,
     onValueChange: (String) -> Unit,
@@ -250,6 +252,8 @@ fun ExpandableCard(
     content: String,
     modifier: Modifier = Modifier
 ) {
+    // Local expansion survives recomposition, not Activity or process recreation.
+    // Local expansion survives recomposition, not Activity or process recreation.
     var expanded by remember { mutableStateOf(false) }
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -291,6 +295,8 @@ fun ExpandableCard(
 /**
  * Example of organizing reusable components in an object.
  */
+// A namespace for composable functions, not a shared state holder.
+// A namespace for composable functions, not a shared state holder.
 object MyComponents {
     /**
      * A primary button for the app.
@@ -371,14 +377,18 @@ fun CombinedExampleScreen() {
         CustomButton(
             text = if (loading) "Loading..." else "Submit",
             onClick = {
+                // This minimal demo check is not complete email-address validation.
+                // This minimal demo check is not complete email-address validation.
                 emailError = email.isBlank() || !email.contains("@")
                 if (!emailError) {
                     loading = true
                     coroutineScope.launch {
-                        delay(5000L) // It's good practice to use 'L' for Long
+                        // Simulated work only; no network request or database write.
+                        // Simulated work only; no network request or database write.
+                        delay(5000L) // Five seconds of simulated work
                         loading = false
                     }
-                } // <-- This closing brace was also missing
+                }
             },
             enabled = !loading
         )

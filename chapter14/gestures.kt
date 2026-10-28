@@ -25,6 +25,8 @@ import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
@@ -133,44 +135,36 @@ fun GestureAnimationTabScreen() {
 /**
  * Demonstrates a button-styled card that provides visual feedback when tapped.
  * When pressed, the button scales down to 95% of its size and changes color
- * from primary to primaryContainer. When released, it animates back to its
+ * from primary to red. When released, it animates back to its
  * original size and color. Uses detectTapGestures with pointerInput to detect
  * press events, animateFloatAsState for smooth scale animation, and
  * animateColorAsState for color transitions.
  */
 @Composable
 fun TapAnimationExample() {
-    // Track whether the button is currently being pressed
     var isPressed by remember { mutableStateOf(false) }
-    
-    // Animate the scale smoothly: when pressed, shrink to 95% size
-    // animateFloatAsState automatically animates between old and new values
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1f, // 0.95f = 95% size, 1f = 100% size
-        animationSpec = tween(durationMillis = 100), // Animation takes 100ms
-        label = "tapScale"
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = tween(durationMillis = 100), label = "tapScale"
     )
-    
-    // Animate the color smoothly: change to red when pressed
     val buttonColor by animateColorAsState(
         targetValue = if (isPressed)
             Color(0xFFFF0000) // Red color when pressed
         else
             MaterialTheme.colorScheme.primary, // Normal theme color
-        animationSpec = tween(durationMillis = 100), // Animation takes 100ms
-        label = "tapColor"
+        animationSpec = tween(durationMillis = 100), label = "tapColor"
     )
     Card(
         modifier = Modifier
-            .scale(scale) // Apply the animated scale to make button shrink/grow
-            .pointerInput(Unit) { // pointerInput allows us to detect touch gestures
+            .scale(scale)
+            .pointerInput(Unit) {
                 detectTapGestures(
-                    onPress = { // Called when user presses down
-                        isPressed = true // Update state to trigger scale/color animation
+                    onPress = {
+                        isPressed = true
                         try {
-                            awaitRelease() // Wait until user releases finger
+                            awaitRelease()
                         } finally {
-                            isPressed = false // Always reset when done (even if error occurs)
+                            isPressed = false
                         }
                     }
                 )
@@ -201,16 +195,28 @@ fun TapAnimationExample() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SwipeToDeleteExample() {
-    // State holding a list of items that can be deleted
     var items by remember { mutableStateOf((1..3).map { "Item $it" }.toMutableList()) }
+    val scope = rememberCoroutineScope()
     Column {
-        // Display each item as a swipeable list item
         items.forEach { item ->
-            SwipeableListItem(
-                item = item,
-                onDelete = { items.remove(item) } // Remove item from list when deleted
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            // Keep dismiss state associated with each unique sample label as rows are removed.
+            // Keep dismiss state associated with each unique sample label as rows are removed.
+            key(item) {
+                SwipeableListItem(
+                    item = item,
+                    onDelete = {
+                        scope.launch {
+                            delay(250) // Let dismiss animation/background settle briefly before removal.
+                            // Assign a changed list to observed state rather than mutating an ordinary list in place.
+                            // Assign a changed list to observed state rather than mutating an ordinary list in place.
+                            val updatedItems = items.toMutableList()
+                            updatedItems.remove(item)
+                            items = updatedItems
+                        }
+                    }
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }
@@ -291,7 +297,7 @@ fun DraggableCardExample() {
             .offset { IntOffset(animatedOffset.x.roundToInt(), animatedOffset.y.roundToInt()) }
             .pointerInput(Unit) {
                 detectDragGestures { change, dragAmount ->
-                    change.consume() // Mark the gesture as consumed so other handlers don't receive it
+                    change.consume() // Mark this change consumed; other handlers can inspect consumption
                     // Add the drag amount to the current offset (accumulates movement)
                     offset += Offset(dragAmount.x, dragAmount.y)
                 }
@@ -350,7 +356,7 @@ fun AnimatedVisibilityExample() {
 
 // 5. Long Press Scale Example
 /**
- * Demonstrates scaling a card up on long press and back down on release.
+ * Demonstrates scaling a card down on long press and back down on release.
  * Uses detectTapGestures for long press and animateFloatAsState for scaling.
  */
 @Composable
@@ -461,11 +467,14 @@ fun InteractiveSliderExample() {
                         if (trackWidth == 0f) return@pointerInput // Safety check: avoid division by zero
                         detectDragGestures(
                             onDragStart = { isDragging = true }, // User started dragging
-                            onDragEnd = { isDragging = false }, // User released
+                            onDragEnd = { isDragging = false },
+                            onDragCancel = { isDragging = false }, // User released
                             onDrag = { change, dragAmount ->
                                 change.consume()
                                 // Calculate how much the drag represents as a percentage
                                 // dragAmount.x is pixels moved, trackWidth is total width
+                                // Both quantities are pixels, so the ratio is a normalized change independent of density.
+                                // Both quantities are pixels, so the ratio is a normalized change independent of density.
                                 val dragPercentage = dragAmount.x / trackWidth
                                 // Update slider value, keeping it between 0 and 1
                                 sliderValue = (sliderValue + dragPercentage).coerceIn(0f, 1f)
@@ -625,8 +634,11 @@ fun RearrangeExample() {
                                 draggedIndex = index
                                 dragOffset = Offset.Zero
                             },
+                            onDragCancel = { draggedIndex = null; dragOffset = Offset.Zero },
                             onDragEnd = {
                                 // Calculate new position based on how far item was dragged
+                                // Convert dp to pixels before comparing against pointer movement.
+                                // Convert dp to pixels before comparing against pointer movement.
                                 val boxHeightPx = with(density) { boxHeight.toPx() } // Convert dp to pixels
                                 val newIndex = when {
                                     // Dragged up more than half a box height: move up one position
@@ -763,8 +775,11 @@ fun TileSwapExample() {
                                                 draggedIndex = index
                                                 dragOffset = Offset.Zero
                                             },
+                                            onDragCancel = { draggedIndex = null; dragOffset = Offset.Zero },
                                             onDragEnd = {
                                                 // Find where the empty space (0) is located
+                                                // This rule checks adjacency only; release location and drag direction are not tested.
+                                                // This rule checks adjacency only; release location and drag direction are not tested.
                                                 val emptyIndex = tiles.indexOf(0)
 
                                                 // Only swap if the dragged tile is next to the empty space

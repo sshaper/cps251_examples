@@ -21,6 +21,7 @@ object SampleImageData {
      * 
      * @return A List containing 6 ImageItem objects with sample data
      */
+    // Paired /id/ URLs keep thumbnail and detail requests tied to the same source image.
     fun getSampleImages(): List<ImageItem> {
         return listOf(
             // Image 1: Both thumbnail and full-size use the same ID (1) so they show the same image

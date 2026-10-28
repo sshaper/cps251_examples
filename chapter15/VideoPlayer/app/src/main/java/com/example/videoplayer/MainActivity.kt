@@ -27,6 +27,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun VideoPlayerApp(modifier: Modifier = Modifier) {
+    // Removing the detail branch also disposes its player; selection is not saved across recreation.
     var selectedVideo by remember { mutableStateOf<VideoItem?>(null) }
     val videos = remember { SampleVideoData.getSampleVideos() }
 

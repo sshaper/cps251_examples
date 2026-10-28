@@ -174,6 +174,8 @@ fun ContactListWithStickyHeaders() {
         // Use system insets to ensure content is not under the status bar/camera
         modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues())
     ) {
+        // groupBy preserves encounter order; it does not sort the names or groups.
+        // groupBy preserves encounter order; it does not sort the names or groups.
         contacts.forEach { (letter, contactList) ->
             stickyHeader {
                 Surface(

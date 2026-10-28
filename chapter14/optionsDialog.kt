@@ -1,6 +1,11 @@
 package com.example.bookexamplesapp
 
 // Android framework imports
+import androidx.compose.material3.*
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import java.util.TimeZone
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -71,57 +76,77 @@ class MainActivity : ComponentActivity() {
  * - State management for showing/hiding overlays
  * - Integration between bottom sheet and dialog
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// The parent retains overlay results after each conditionally composed overlay closes.
+// The parent retains overlay results after each conditionally composed overlay closes.
 fun MyScreen() {
-    // State variables to control the visibility of overlays
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showOptionsSheet by remember { mutableStateOf(false) }
-
-    // Main content column with buttons
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .padding(top = 50.dp) // Extra top padding to avoid status bar
-    ) {
-        // Button to show the options bottom sheet
-        Button(onClick = { showOptionsSheet = true }) {
-            Text("Show Options")
-        }
-
-        // Button to show the delete confirmation dialog directly
-        Button(onClick = { showDeleteDialog = true }) {
-            Text("Delete Item")
-        }
+    var showListOptionsDialog by remember { mutableStateOf(false) }
+    var showDatePickerDialog by remember { mutableStateOf(false) }
+    var bottomSheetSelection by remember { mutableStateOf("") }
+    var listOptionSelection by remember { mutableStateOf("") }
+    var dateSelection by remember { mutableStateOf("") }
+    val selectionSummary = buildString {
+        if (bottomSheetSelection.isNotEmpty()) appendLine("Bottom sheet: $bottomSheetSelection")
+        if (listOptionSelection.isNotEmpty()) appendLine("List option: $listOptionSelection")
+        if (dateSelection.isNotEmpty()) appendLine("Date: $dateSelection")
+    }.trimEnd().ifEmpty { "Selections will appear here." }
+    Column(Modifier.fillMaxSize().padding(16.dp).padding(top = 50.dp)) {
+        Button(onClick = { showOptionsSheet = true }) { Text("Show Options") }
+        Button(onClick = { showDeleteDialog = true }) { Text("Delete Item") }
+        Button(onClick = { showListOptionsDialog = true }) { Text("List Options") }
+        Button(onClick = { showDatePickerDialog = true }) { Text("Pick Date") }
+        OutlinedTextField(
+            value = selectionSummary,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text("Selections") },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
-
-    // Conditional rendering of the options bottom sheet
-    // This demonstrates how to show a modal bottom sheet
     if (showOptionsSheet) {
         OptionsBottomSheet(
             onDismiss = { showOptionsSheet = false },
             onOptionSelected = { option ->
-                // Handle the selected option from the bottom sheet
-                when (option) {
-                    "Delete" -> showDeleteDialog = true // Chain to dialog
-                    "Edit" -> { /* Handle edit action */ }
-                    "Share" -> { /* Handle share action */ }
-                }
+                bottomSheetSelection = option
+                if (option == "Delete") showDeleteDialog = true
             }
         )
     }
-
-    // Conditional rendering of the delete confirmation dialog
-    // This demonstrates how to show an alert dialog
     if (showDeleteDialog) {
         DeleteConfirmationDialog(
-            onConfirm = {
-                // Handle the actual deletion here
-                // For this example, we just close the dialog
-                showDeleteDialog = false
-            },
+            onConfirm = { showDeleteDialog = false },
             onDismiss = { showDeleteDialog = false }
         )
+    }
+    if (showListOptionsDialog) {
+        ListOptionsDialog(
+            onDismiss = { showListOptionsDialog = false },
+            onOptionSelected = { listOptionSelection = it }
+        )
+    }
+    if (showDatePickerDialog) {
+        // This call site leaves composition on dismissal, so a later opening starts fresh.
+        val datePickerState = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showDatePickerDialog = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    dateSelection = datePickerState.selectedDateMillis?.let { millis ->
+                        val formatter = SimpleDateFormat("MMM d, yyyy", Locale.getDefault()).apply {
+                            timeZone = TimeZone.getTimeZone("UTC")
+                        }
+                        formatter.format(Date(millis))
+                    } ?: "No date selected"
+                    showDatePickerDialog = false
+                }) { Text("OK") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePickerDialog = false }) { Text("Cancel") }
+            }
+        ) { DatePicker(state = datePickerState) }
     }
 }
 
@@ -228,3 +253,35 @@ fun MyScreenPreview() {
     MyScreen()
 }
 
+
+@Composable
+// Report the choice before dismissal; cancellation only closes the dialog.
+// Report the choice before dismissal; cancellation only closes the dialog.
+fun ListOptionsDialog(
+    onDismiss: () -> Unit,
+    onOptionSelected: (String) -> Unit = {}
+) {
+    val options = listOf("Small", "Medium", "Large", "Extra large")
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose a size") },
+        text = {
+            Column(Modifier.fillMaxWidth()) {
+                options.forEach { option ->
+                    TextButton(
+                        onClick = {
+                            onOptionSelected(option)
+                            onDismiss()
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(option)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}

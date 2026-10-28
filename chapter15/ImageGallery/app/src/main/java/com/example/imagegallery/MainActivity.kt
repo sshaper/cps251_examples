@@ -65,6 +65,7 @@ fun ImageGalleryApp(modifier: Modifier = Modifier) {
     // remember { mutableStateOf(...) } creates state that persists across recompositions
     // The "by" keyword is a Kotlin delegate that allows us to use selectedImage
     // directly instead of having to write selectedImage.value
+    // This local choice controls conditional screens, not a navigation back stack.
     var selectedImage by remember { mutableStateOf<ImageItem?>(null) }
     
     // images holds the list of all images in our gallery

@@ -44,9 +44,10 @@ fun ImageCard(
             // AsyncImage loads and displays the image from the internet
             // This is the simplest way to load images - Coil handles everything automatically:
             // - Downloads the image in the background
-            // - Shows a loading indicator while downloading
+            // - Exposes request state; a visible loading indicator requires explicit UI
             // - Caches the image for faster future loads
-            // - Handles errors gracefully
+            // - Supports error handling; this call supplies no error painter
+            // The request has no configured spinner, placeholder, or error painter.
             AsyncImage(
                 model = imageItem.thumbnailUrl,  // URL of the thumbnail (smaller image for the list)
                 contentDescription = imageItem.title, // Text for screen readers (accessibility)

@@ -15,6 +15,7 @@ package com.example.imagegallery
  * @param imageUrl The URL for the full-size version of the image (used when viewing the image in detail)
  * @param thumbnailUrl The URL for the smaller thumbnail version (used in the list view for faster loading)
  */
+// Both URLs identify the same source picture at different request sizes.
 data class ImageItem(
     val id: String,              // Unique identifier: "1", "2", "3", etc.
     val title: String,           // Display name: "Sample Image 1", "Sample Image 2", etc.

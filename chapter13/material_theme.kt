@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -68,6 +68,7 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CustomThemeExample() {
     // Define custom colors for the Material theme
+    // Factory defaults fill unspecified roles; primary alone does not generate all paired colors.
     val customColors = lightColorScheme(
         primary = Color(0xFF6200EE),    // Deep Purple
         secondary = Color(0xFF03DAC6)   // Teal

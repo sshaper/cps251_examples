@@ -26,6 +26,7 @@ fun VideoListScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp),
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
     ) {
+        // Forward selection to the parent; this list does not start playback.
         items(videos) { video ->
             VideoListItem(
                 videoItem = video,

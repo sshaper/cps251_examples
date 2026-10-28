@@ -55,10 +55,14 @@ class MainActivity : ComponentActivity() {
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
+// These are text placeholders in a gallery layout, not loaded images.
+// These are text placeholders in a gallery layout, not loaded images.
 fun PhotoGallery() {
     val photos = List(12) { "Photo ${it + 1}" }
 
     LazyVerticalGrid(
+        // Fixed keeps three columns; available width determines each square cell width.
+        // Fixed keeps three columns; available width determines each square cell width.
         columns = GridCells.Fixed(3),
         modifier = Modifier.padding(top = 50.dp),
         contentPadding = PaddingValues(8.dp),

@@ -30,7 +30,7 @@ import androidx.compose.ui.tooling.preview.Preview
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -46,9 +46,9 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * LightDarkModeExample demonstrates Material Design 3's dynamic theming capabilities:
+ * LightDarkModeExample demonstrates system-driven light/dark scheme selection:
  * 1. Automatic theme switching based on system settings
- * 2. Dynamic color scheme application
+ * 2. Default light/dark palette application (not wallpaper-derived dynamic color)
  * 3. Proper use of Material Design color system for both light and dark modes
  * 
  * The composable:
@@ -69,6 +69,7 @@ fun LightDarkModeExample() {
     val isDarkTheme = isSystemInDarkTheme()
     
     // Select appropriate color scheme based on theme
+    // Select default light/dark palettes, rather than wallpaper-derived dynamic color.
     val colors = if (isDarkTheme) darkColorScheme() else lightColorScheme()
     
     // Apply the selected color scheme to Material theme
@@ -90,7 +91,7 @@ fun LightDarkModeExample() {
                 )
                 
                 // Theme-aware button
-                Button(onClick = { /* TODO: Implement theme toggle action */ }) {
+                Button(onClick = { /* Placeholder only: does not toggle the system theme */ }) {
                     Text("Try Me!")
                 }
             }

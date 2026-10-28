@@ -3,6 +3,7 @@ package com.example.videoplayer
 // Sample video data using public test videos
 object SampleVideoData {
 
+    // These network endpoints and placeholder thumbnails require runtime availability checks.
     fun getSampleVideos(): List<VideoItem> {
         return listOf(
             VideoItem(

@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -83,7 +83,7 @@ class MainActivity : ComponentActivity() {
  * - Changes elevation
  * - Changes width
  * - Shows/hides content with animation
- * - Crossfades between different text states
+ * - Contains a Crossfade whose state changes together with visibility
  */
 @Composable
 fun AnimatedCardExample() {
@@ -129,7 +129,8 @@ fun AnimatedCardExample() {
             )
             
             // Animated visibility for additional content
-            AnimatedVisibility(visible = expanded) {
+            // showDetails follows expanded; Crossfade is not an independent message toggle here.
+    AnimatedVisibility(visible = expanded) {
                 Column {
                     Spacer(modifier = Modifier.height(8.dp))
                     // Crossfade animation between states
@@ -167,7 +168,7 @@ fun AnimatedBoxExample() {
         targetValue = if (isExpanded) 150.dp else 80.dp,
         animationSpec = tween(
             durationMillis = 500, // Animation duration: 500ms
-            // easing = FastOutSlowInEasing (default) - starts fast, ends slow
+            // easing = FastOutSlowInEasing (default) - varies progress across the duration
         ),
         label = "boxSize"
     )

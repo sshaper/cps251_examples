@@ -33,7 +33,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -63,7 +63,8 @@ class MainActivity : ComponentActivity() {
 fun MaterialExample() {
     MaterialTheme {
         // Scaffold provides a basic Material Design layout structure
-        Scaffold(
+        // Scaffold supplies content padding; apply it below the top bar.
+    Scaffold(
             // TopAppBar displays the app title at the top of the screen
             topBar = {
                 TopAppBar(title = { Text("My App") })

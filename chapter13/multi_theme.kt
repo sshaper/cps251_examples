@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -83,6 +83,7 @@ fun AdminSection(modifier: Modifier = Modifier) {
         background = Color(0xFFFFEBEE)  // Light red background
     )
     
+    // This provider affects descendants only; the neighboring UserSection keeps its scheme.
     MaterialTheme(colorScheme = adminColors) {
         Surface(
             modifier = modifier.fillMaxSize(),

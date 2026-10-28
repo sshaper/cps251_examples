@@ -40,7 +40,7 @@ fun FullSizeImageScreen(
         topBar = {
             // TopAppBar creates a bar at the top of the screen
             TopAppBar(
-                title = { Text(imageItem.title) }, // Shows the image title in the center
+                title = { Text(imageItem.title) }, // Shows the image title in the app bar
                 navigationIcon = {
                     // IconButton creates a clickable icon button
                     IconButton(onClick = onBackClick) {
@@ -66,6 +66,7 @@ fun FullSizeImageScreen(
             // AsyncImage loads and displays the full-size image
             // This uses imageItem.imageUrl (the full-size 800x600 image)
             // instead of imageItem.thumbnailUrl (the smaller 200x200 thumbnail)
+            // Fit keeps the entire image visible; the list uses Crop to fill its thumbnail bounds.
             AsyncImage(
                 model = imageItem.imageUrl,       // URL of the full-size image (800x600)
                 contentDescription = imageItem.title, // Text for screen readers

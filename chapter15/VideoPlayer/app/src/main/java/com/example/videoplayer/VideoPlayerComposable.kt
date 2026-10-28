@@ -20,6 +20,7 @@ fun VideoPlayerComposable(
     val context = LocalContext.current
 
     // Create and remember the ExoPlayer instance
+    // This call site keeps one player; changing videoUrl in place does not reload it.
     val exoPlayer = remember {
         ExoPlayer.Builder(context).build().apply {
             val mediaItem = MediaItem.fromUri(videoUrl)

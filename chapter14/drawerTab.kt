@@ -72,6 +72,8 @@ class MainActivity : ComponentActivity() {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
+// The drawer entries are placeholders; only selectedTab changes the displayed content.
+// The drawer entries are placeholders; only selectedTab changes the displayed content.
 fun AppWithDrawerAndTabs() {
     // State for the navigation drawer (open/closed)
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)

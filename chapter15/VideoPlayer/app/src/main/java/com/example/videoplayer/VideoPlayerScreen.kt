@@ -36,6 +36,7 @@ fun VideoPlayerScreen(
                 .padding(paddingValues)
         ) {
             // Video player
+            // The container requests 16:9; PlayerView handles how the source video fits inside it.
             VideoPlayerComposable(
                 videoUrl = videoItem.videoUrl,
                 modifier = Modifier

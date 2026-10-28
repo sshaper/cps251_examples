@@ -23,13 +23,18 @@ import com.example.weatherappnocache.api.RetrofitClient
 
 @Composable
 fun WeatherAppScreen() {
+    // Accessing the lazy property configures the shared service; it does not fetch.
     val weatherApiService = RetrofitClient.weatherApiService
+    // Reuse this repository during recomposition. remember is not disk storage.
     val weatherRepository = remember { WeatherRepository(weatherApiService) }
+    // With no nearer owner, this Activity hosts the retained ViewModel.
+    // A new factory argument does not replace an already retained instance.
     val weatherViewModel: WeatherViewModel = viewModel(
         factory = WeatherViewModel.provideFactory(weatherRepository)
     )
 
-    // Collect states from the ViewModel
+    // Bridge StateFlow values into Compose State so changes update the screen.
+    // collectAsState follows composition; it is not lifecycle STARTED collection.
     val zipcode by weatherViewModel.zipcode.collectAsState()
     val weatherResponse by weatherViewModel.weatherResponse.collectAsState()
     val errorMessage by weatherViewModel.errorMessage.collectAsState()
@@ -41,6 +46,7 @@ fun WeatherAppScreen() {
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
+        // Send edits upward; the collected value comes back down to the field.
         OutlinedTextField(
             value = zipcode,
             onValueChange = { weatherViewModel.onZipcodeChange(it) },
@@ -49,15 +55,18 @@ fun WeatherAppScreen() {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
+        // Fetch only in response to this event, never in the composable body.
         Button(onClick = { weatherViewModel.fetchWeather() }) {
             Text("Get Weather")
         }
 
+        // Initial, successful, and failed states; no separate loading branch.
         when {
             weatherResponse != null -> {
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalAlignment = Alignment.Start) {
                     Text("City: ${weatherResponse?.name}")
                     Text("Temperature: ${weatherResponse?.main?.temp}°C")
+                    // The API returns an array; an empty list has no first item.
                     Text("Description: ${weatherResponse?.weather?.firstOrNull()?.description}")
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Other Info:")
@@ -74,6 +83,7 @@ fun WeatherAppScreen() {
             }
             errorMessage != null -> {
                 Column(modifier = Modifier.fillMaxWidth().padding(top = 16.dp), horizontalAlignment = Alignment.Start) {
+                    // Fixed UI wording covers all failures, not only unknown ZIPs.
                     Text("No weather found for that zip code")
                 }
             }

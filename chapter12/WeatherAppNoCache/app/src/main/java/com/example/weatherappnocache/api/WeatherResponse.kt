@@ -1,5 +1,7 @@
 package com.example.weatherappnocache.api
 
+// A successful JSON response becomes this object and its nested objects/lists.
+// Names intentionally match API keys, including snake_case, for Gson mapping.
 data class WeatherResponse(
     val coord: Coord,
     val weather: List<Weather>,
@@ -16,11 +18,13 @@ data class WeatherResponse(
     val cod: Int
 )
 
+// The coord JSON object contains longitude and latitude.
 data class Coord(
     val lon: Double,
     val lat: Double
 )
 
+// One entry in the weather JSON array; the UI reads the first description.
 data class Weather(
     val id: Int,
     val main: String,
@@ -28,6 +32,8 @@ data class Weather(
     val icon: String
 )
 
+// With metric units, temperatures are Celsius and pressures are hPa.
+// Nullable pressure fields allow these optional values to be absent.
 data class Main(
     val temp: Double,
     val feels_like: Double,
@@ -39,16 +45,20 @@ data class Main(
     val grnd_level: Int?
 )
 
+// Metric wind speed/gust are m/s; deg is direction in degrees.
 data class Wind(
     val speed: Double,
     val deg: Int,
     val gust: Double?
 )
 
+// Cloud coverage is a percentage.
 data class Clouds(
     val all: Int
 )
 
+// Sunrise/sunset and response dt are Unix timestamps in seconds.
+// The screen displays those raw numbers; it does not format local clock times.
 data class Sys(
     val type: Int?,
     val id: Int?,

@@ -19,7 +19,7 @@ import com.example.weatherappnocache.ui.theme.WeatherAppNoCacheTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons
+        // A light status-bar appearance requests dark icons on a light background.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
 
 
@@ -30,6 +30,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
+                    // The screen wires the service, repository, and owned ViewModel.
                     WeatherAppScreen()
                 }
             }

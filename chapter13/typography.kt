@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -57,6 +57,7 @@ class MainActivity : ComponentActivity() {
  */
 @Composable
 fun StyleExample() {
+    // This provider has no overrides and uses surrounding values; it does not load Theme.kt.
     MaterialTheme {
         // Main card container with custom styling
         Card(

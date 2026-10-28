@@ -28,7 +28,7 @@ import androidx.compose.ui.unit.dp
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Configure the window to use light status bar icons for better visibility
+        // Request dark status-bar icons (true means a light status-bar appearance).
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = true
         
         // Set up the Compose UI with Material Design theme
@@ -52,7 +52,7 @@ class MainActivity : ComponentActivity() {
  * 
  * The button features:
  * - Red background color (using Color.Red)
- * - Fully rounded corners (50dp radius)
+ * - Fully rounded corners (50 percent of the smaller dimension)
  * - Elevated appearance (12dp elevation)
  * - White text color for contrast
  * - Top padding of 50dp for proper positioning
@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
  * - Override default Material Design button colors
  * - Create custom button shapes
  * - Apply custom elevation
- * - Ensure proper text contrast
+ * - Choose explicit colors and check their contrast
  */
 @Composable
 fun CustomButtonExample() {
@@ -75,7 +75,8 @@ fun CustomButtonExample() {
             containerColor = Color.Red
         ),
         // Create a fully rounded button shape
-        shape = RoundedCornerShape(50),
+        // The integer overload uses percent corners, not a 50.dp radius.
+    shape = RoundedCornerShape(50),
         // Add elevation for depth
         elevation = ButtonDefaults.buttonElevation(12.dp)
     ) {

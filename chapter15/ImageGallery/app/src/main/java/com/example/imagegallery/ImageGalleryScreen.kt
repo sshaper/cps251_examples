@@ -12,7 +12,7 @@ import androidx.compose.ui.unit.dp
  * ImageGalleryScreen displays a scrollable list of image cards.
  * 
  * This screen shows all the images in a vertical list. It uses LazyColumn
- * which is efficient because it only creates and displays the image cards
+ * which is efficient because it creates and displays image cards as needed, including nearby content, rather than all cards at once; it is not restricted to cards
  * that are currently visible on screen. As you scroll, it creates new cards
  * and removes ones that are off-screen, making it very memory efficient.
  * 
@@ -26,7 +26,7 @@ fun ImageGalleryScreen(
     onImageClick: (ImageItem) -> Unit           // Function called when an image is clicked
 ) {
     // LazyColumn creates a vertically scrollable list
-    // It's "lazy" because it only creates items that are visible on screen
+    // It's "lazy" because it composes items as needed for layout and scrolling
     // This makes it very efficient for long lists
     LazyColumn(
         modifier = Modifier
@@ -37,6 +37,7 @@ fun ImageGalleryScreen(
     ) {
         // items() is a LazyColumn function that creates one item for each element in the list
         // For each image in the images list, it creates an ImageCard
+        // Report the selected data item upward; the list does not own screen selection.
         items(images) { image ->
             // Create an ImageCard for this image
             ImageCard(
