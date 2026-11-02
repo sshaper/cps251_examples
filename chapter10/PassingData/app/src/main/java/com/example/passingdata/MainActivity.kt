@@ -50,7 +50,7 @@ fun PassingData(modifier: Modifier = Modifier) {
     // reads its String value, so Name and Output can be used directly below.
     // collectAsState follows composition lifetime; it does not pause collection
     // just because the Activity moves to the background.
-    val Name by viewModel.Name.collectAsState()
+    val Name by viewModel.name.collectAsState()
     val Output by viewModel.output.collectAsState()
 
     Column(modifier = modifier.padding(16 .dp)) {

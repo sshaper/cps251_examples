@@ -15,8 +15,8 @@ class MainViewModel : ViewModel() {
     // The public StateFlow type exposes reads/collection without a value setter.
     // Name preserves this example's existing spelling; Kotlin properties normally
     // start with a lowercase letter. The UI must use the matching property name.
-    private val _Name = MutableStateFlow("")
-    val Name: StateFlow<String> = _Name
+    private val _name = MutableStateFlow("")
+    val name: StateFlow<String> = _name
 
     // Output changes only when displayName() runs, not on every keystroke.
     private val _output= MutableStateFlow("")
@@ -24,11 +24,11 @@ class MainViewModel : ViewModel() {
 
     // Called by the text field's onValueChange with the complete new text.
     fun onNameChange(name: String) {
-        _Name.value = name
+        _name.value = name
     }
 
     // Build a message from the name stored at the moment the button is pressed.
     fun displayName() {
-        _output.value = "The name is ${_Name.value}"
+        _output.value = "The name is ${_name.value}"
     }
 }

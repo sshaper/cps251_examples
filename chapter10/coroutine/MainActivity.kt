@@ -24,6 +24,12 @@ import androidx.compose.ui.unit.dp
  */
 class MainActivity : ComponentActivity() {
     // Retrieve the Activity-owned instance and pass it explicitly to DataScreen.
+    // `by viewModels()` delegates this property to an Activity helper that lazily
+    // retrieves the managed ViewModel, retaining the same instance across rotation.
+    // In Compose, `viewModel: MainViewModel = viewModel()` instead uses a function
+    // call as a default parameter value when the caller omits the argument.
+    // viewModels() (plural) is the Activity delegate; viewModel() (singular) is
+    // the Compose function. Both retrieve a ViewModel for their current owner.
     private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
