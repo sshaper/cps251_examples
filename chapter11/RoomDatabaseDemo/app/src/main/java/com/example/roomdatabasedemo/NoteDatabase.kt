@@ -6,7 +6,8 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 
 // Annotates the class as a Room database, specifying the entities it contains (Note) and the version.
-// exportSchema is set to false to prevent exporting schema into a folder.
+// exportSchema is set to false to prevent exporting schema into a folder. To add more tables you would just add
+// them to the bracket like [Note::class,OtherTable::class]
 @Database(entities = [Note::class], version = 1, exportSchema = false)
 abstract class NoteDatabase : RoomDatabase() {
     // Abstract method to provide the Data Access Object (DAO) for notes.

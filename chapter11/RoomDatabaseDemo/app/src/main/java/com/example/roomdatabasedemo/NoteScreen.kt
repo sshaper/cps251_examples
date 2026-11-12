@@ -71,11 +71,13 @@ fun NoteScreen(viewModel: NoteViewModel) {
                         } else {
                             // copy changes the edited values while preserving the saved note's ID.
                             // The date records the most recent save, as it does when adding a note.
+                            //the note id is saved but the title, content and date can be changed.
                             viewModel.updateNote(editingNote!!.copy(
                                 title = title,
                                 content = content,
                                 date = dateFormat.format(Date())
                             ))
+                            //turns editingNote back to null so next will be a note added.
                             editingNote = null
                             scope.launch { snackbarHostState.showSnackbar("Note updated!") }
                         }
